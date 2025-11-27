@@ -44,7 +44,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="bn">
-      <body className={`${notoSansBengali.className} font-sans antialiased`}>
+      <body className={`${notoSansBengali.className} font-sans antialiased hydrated`}>
         <Navbar />
         <div className="px-2 md:px-20 md:pt-4 pt-2">
           {children}
