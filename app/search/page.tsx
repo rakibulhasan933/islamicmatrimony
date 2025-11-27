@@ -583,7 +583,6 @@ function SearchContent() {
           </div>
         )}
       </main>
-      <Footer />
     </>
   )
 }
