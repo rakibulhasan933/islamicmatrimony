@@ -1,0 +1,67 @@
+import { LoginForm } from "@/components/auth/login-form"
+import { CrescentMoon, Lantern } from "@/components/islamic-pattern"
+import Link from "next/link"
+
+export default function LoginPage() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/10 p-4 relative overflow-hidden">
+      {/* Decorative Elements */}
+      <div className="absolute inset-0 opacity-[0.03]">
+        <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <defs>
+            <pattern id="login-pattern" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
+              <path
+                d="M5 0L10 5L5 10L0 5Z"
+                stroke="currentColor"
+                strokeWidth="0.3"
+                fill="none"
+                className="text-primary"
+              />
+            </pattern>
+          </defs>
+          <rect width="100" height="100" fill="url(#login-pattern)" />
+        </svg>
+      </div>
+
+      <Lantern className="absolute top-20 left-[10%] w-12 h-16 text-accent/20 animate-float hidden md:block" />
+      <CrescentMoon className="absolute top-32 right-[15%] w-14 h-14 text-secondary/30 animate-glow hidden md:block" />
+
+      <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px]" />
+      <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-secondary/10 rounded-full blur-[100px]" />
+
+      <div className="relative z-10 w-full max-w-md">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-block">
+            <h1 className="text-2xl md:text-3xl font-bold text-primary">নিকাহ</h1>
+            <p className="text-sm text-muted-foreground">ইসলামী ম্যাট্রিমনি</p>
+          </Link>
+        </div>
+
+        {/* Login Card */}
+        <div className="bg-card/80 backdrop-blur-md border border-border/50 rounded-2xl p-6 md:p-8 shadow-xl">
+          <div className="text-center mb-6">
+            <h2 className="text-xl md:text-2xl font-bold text-foreground">লগইন করুন</h2>
+            <p className="text-muted-foreground mt-2 text-sm md:text-base">আপনার অ্যাকাউন্টে প্রবেশ করুন</p>
+          </div>
+
+          <LoginForm />
+
+          <div className="mt-6 text-center text-sm">
+            <span className="text-muted-foreground">অ্যাকাউন্ট নেই? </span>
+            <Link href="/register" className="text-primary hover:underline font-medium">
+              রেজিস্টার করুন
+            </Link>
+          </div>
+        </div>
+
+        {/* Back to Home */}
+        <div className="text-center mt-6">
+          <Link href="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+            ← হোমপেজে ফিরে যান
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
+}
