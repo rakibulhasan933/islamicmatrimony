@@ -20,11 +20,11 @@ import {
   Grid3X3,
   List,
   Loader2,
+  BadgeCheck,
 } from "lucide-react"
-import { Navbar } from "@/components/navbar"
-import { Footer } from "@/components/footer"
 import { Checkbox } from "@/components/ui/checkbox"
 import Image from "next/image"
+import { FREELANCER_PROFESSIONS } from "@/components/hero-section"
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
@@ -40,6 +40,7 @@ interface BiodataItem {
   maritalStatus: string | null
   createdAt: string
   photo: string | null
+  isPremium?: boolean
 }
 
 interface BiodataResponse {
@@ -83,7 +84,6 @@ function CheckboxFilter({ label, checked, onChange }: { label: string; checked: 
       <Checkbox
         checked={checked}
         onCheckedChange={(checkedState) => {
-          // Only trigger onChange, ignore the checked value as parent manages state
           onChange()
         }}
         className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
@@ -108,7 +108,7 @@ function SearchContent() {
     age: true,
     location: true,
     education: false,
-    profession: false,
+    profession: true, // Open profession filter by default for freelancer site
   })
 
   const [filters, setFilters] = useState({
@@ -137,6 +137,7 @@ function SearchContent() {
     if (filters.ageMin > 18) params.set("ageMin", filters.ageMin.toString())
     if (filters.ageMax < 60) params.set("ageMax", filters.ageMax.toString())
     if (filters.education.length === 1) params.set("education", filters.education[0])
+    if (filters.profession.length === 1) params.set("profession", filters.profession[0])
     params.set("page", currentPage.toString())
     params.set("limit", "12")
     return `/api/biodatas?${params.toString()}`
@@ -144,7 +145,7 @@ function SearchContent() {
 
   const { data, error, isLoading } = useSWR<BiodataResponse>(mounted ? buildApiUrl() : null, fetcher, {
     revalidateOnFocus: false,
-  });
+  })
   const toggleFilter = (key: keyof typeof openFilters) => {
     setOpenFilters((prev) => ({ ...prev, [key]: !prev[key] }))
   }
@@ -177,7 +178,7 @@ function SearchContent() {
     filters.education.length +
     filters.profession.length
 
-  const biodatas = data?.biodatas || [];
+  const biodatas = data?.biodatas || []
 
   const pagination = data?.pagination
 
@@ -292,8 +293,21 @@ function SearchContent() {
 
       {/* Location Filter */}
       <FilterSection title="জেলা" isOpen={openFilters.location} onToggle={() => toggleFilter("location")}>
-        <div className="space-y-2">
-          {["ঢাকা", "চট্টগ্রাম", "রাজশাহী", "খুলনা", "সিলেট", "বরিশাল", "রংপুর", "ময়মনসিংহ"].map((loc) => (
+        <div className="space-y-2 max-h-48 overflow-y-auto">
+          {[
+            "ঢাকা",
+            "চট্টগ্রাম",
+            "রাজশাহী",
+            "খুলনা",
+            "সিলেট",
+            "বরিশাল",
+            "রংপুর",
+            "ময়মনসিংহ",
+            "কুমিল্লা",
+            "গাজীপুর",
+            "নারায়ণগঞ্জ",
+            "ফরিদপুর",
+          ].map((loc) => (
             <CheckboxFilter
               key={loc}
               label={loc}
@@ -317,24 +331,36 @@ function SearchContent() {
           ))}
         </div>
       </FilterSection>
+
+      {/* Profession Filter - Updated to freelancer professions */}
+      <FilterSection title="ফ্রিল্যান্সিং পেশা" isOpen={openFilters.profession} onToggle={() => toggleFilter("profession")}>
+        <div className="space-y-2 max-h-64 overflow-y-auto">
+          {FREELANCER_PROFESSIONS.map((prof) => (
+            <CheckboxFilter
+              key={prof}
+              label={prof}
+              checked={filters.profession.includes(prof)}
+              onChange={() => toggleArrayFilter("profession", prof)}
+            />
+          ))}
+        </div>
+      </FilterSection>
     </div>
   )
 
   return (
     <>
-      <Navbar />
       <main className="min-h-screen bg-linear-to-b from-background to-muted/20 pt-20">
         <div className="container mx-auto px-4 py-8">
           {/* Page Header */}
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">বায়োডাটা খুঁজুন</h1>
-            <p className="text-muted-foreground">আপনার পছন্দের জীবনসঙ্গী খুঁজে নিন</p>
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">ফ্রিল্যান্সার বায়োডাটা খুঁজুন</h1>
+            <p className="text-muted-foreground">আপনার পছন্দের ফ্রিল্যান্সার জীবনসঙ্গী খুঁজে নিন</p>
           </div>
 
           <div className="flex flex-col lg:flex-row gap-8">
-            {/* Desktop Filters Sidebar */}
             <div className="hidden lg:block w-80 shrink-0">
-              <div className="bg-card border border-border rounded-xl p-6 sticky top-24">
+              <div className="bg-card border border-border rounded-xl p-6 sticky top-24 max-h-[calc(100vh-120px)] overflow-y-auto">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="font-bold text-lg flex items-center gap-2">
                     <Filter className="w-5 h-5" />
@@ -422,144 +448,134 @@ function SearchContent() {
 
               {/* Results Grid/List */}
               {mounted && !isLoading && !error && biodatas.length > 0 && (
-                <div
-                  className={viewMode === "grid" ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6" : "space-y-4"}
-                >
-                  {biodatas.map((biodata) => (
-                    <Link
-                      key={biodata.id}
-                      href={`/biodata/${biodata.biodataNo}`}
-                      className={`bg-card border border-border rounded-xl overflow-hidden hover:shadow-lg hover:border-primary/30 transition-all duration-300 group ${viewMode === "list" ? "flex" : ""}`}
-                    >
-                      {/* Profile Image Placeholder */}
-                      <Image
-                        src={biodata.photo as string}
-                        alt={`${biodata.type === "bride" ? "পাত্রী" : "পাত্র"} - ${biodata.biodataNo}`}
-                        width={400}
-                        height={300}
-                        priority
-                        className={`object-cover ${viewMode === "list" ? "w-32 h-32 shrink-0" : "aspect-4/3"}`}
-                      />
-
-                      {/* Content */}
-                      <div className={`p-4 ${viewMode === "list" ? "flex-1" : ""}`}>
-                        <div className="flex items-center justify-between mb-2">
-                          <span
-                            className={`text-xs font-medium px-2 py-1 rounded-full ${biodata.type === "bride" ? "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300" : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"}`}
-                          >
+                <>
+                  <div
+                    className={
+                      viewMode === "grid"
+                        ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"
+                        : "flex flex-col gap-4"
+                    }
+                  >
+                    {biodatas.map((biodata) => (
+                      <Link
+                        key={biodata.id}
+                        href={`/biodata/${biodata.biodataNo}`}
+                        className={`group bg-card border border-border rounded-xl overflow-hidden hover:shadow-lg hover:border-primary/30 transition-all duration-300 ${viewMode === "list" ? "flex" : ""
+                          }`}
+                      >
+                        {/* Photo */}
+                        <div className={`relative bg-muted ${viewMode === "list" ? "w-32 shrink-0" : "aspect-4/3"}`}>
+                          {biodata.photo ? (
+                            <Image
+                              src={biodata.photo || "/placeholder.svg"}
+                              alt={`বায়োডাটা ${biodata.biodataNo}`}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          ) : (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                                <span className="text-2xl font-bold text-primary">
+                                  {biodata.type === "bride" ? "👩" : "👨"}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                          {/* Premium Badge */}
+                          {biodata.isPremium && (
+                            <div className="absolute top-2 right-2 bg-amber-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                              <BadgeCheck className="w-3 h-3" />
+                              ভেরিফাইড
+                            </div>
+                          )}
+                          {/* Type Badge */}
+                          <div className="absolute top-2 left-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
                             {biodata.type === "bride" ? "পাত্রী" : "পাত্র"}
-                          </span>
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault()
-                              // TODO: Add to shortlist
-                            }}
-                            className="p-1.5 rounded-full hover:bg-muted transition-colors"
-                          >
-                            <Heart className="w-4 h-4 text-muted-foreground hover:text-red-500" />
-                          </button>
+                          </div>
                         </div>
 
-                        <div className="space-y-1.5 text-sm">
-                          <p className="flex items-center gap-2 text-muted-foreground">
-                            <span className="font-medium text-foreground">বয়স:</span>
-                            {biodata.age || "N/A"} বছর
-                          </p>
-                          <p className="flex items-center gap-2 text-muted-foreground">
-                            <MapPin className="w-3.5 h-3.5" />
-                            {biodata.currentDistrict || "N/A"}
-                          </p>
-                          <p className="flex items-center gap-2 text-muted-foreground">
-                            <GraduationCap className="w-3.5 h-3.5" />
-                            {biodata.education || "N/A"}
-                          </p>
-                          <p className="flex items-center gap-2 text-muted-foreground">
-                            <Briefcase className="w-3.5 h-3.5" />
-                            {biodata.occupation || "N/A"}
-                          </p>
+                        {/* Info */}
+                        <div className={`p-4 ${viewMode === "list" ? "flex-1" : ""}`}>
+                          <div className="flex items-center justify-between mb-2">
+                            <h3 className="font-bold text-foreground">বায়োডাটা #{biodata.biodataNo}</h3>
+                            <Heart className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                          </div>
+
+                          <div className="space-y-1.5 text-sm text-muted-foreground">
+                            {biodata.age && (
+                              <p className="flex items-center gap-2">
+                                <span className="text-primary">বয়স:</span> {biodata.age} বছর
+                              </p>
+                            )}
+                            {biodata.height && (
+                              <p className="flex items-center gap-2">
+                                <span className="text-primary">উচ্চতা:</span> {biodata.height}
+                              </p>
+                            )}
+                            {biodata.occupation && (
+                              <p className="flex items-center gap-2">
+                                <Briefcase className="w-3.5 h-3.5 text-primary" />
+                                {biodata.occupation}
+                              </p>
+                            )}
+                            {biodata.currentDistrict && (
+                              <p className="flex items-center gap-2">
+                                <MapPin className="w-3.5 h-3.5 text-primary" />
+                                {biodata.currentDistrict}
+                              </p>
+                            )}
+                            {biodata.education && (
+                              <p className="flex items-center gap-2">
+                                <GraduationCap className="w-3.5 h-3.5 text-primary" />
+                                {biodata.education}
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="mt-3 pt-3 border-t border-border">
+                            <span className="text-xs text-muted-foreground">
+                              {getMaritalStatusDisplay(biodata.maritalStatus)}
+                            </span>
+                          </div>
                         </div>
-
-                        <div className="mt-3 pt-3 border-t border-border flex items-center justify-between">
-                          <span className="text-xs text-muted-foreground">
-                            {getMaritalStatusDisplay(biodata.maritalStatus)}
-                          </span>
-                          <span className="text-xs text-primary font-medium group-hover:underline">বিস্তারিত দেখুন →</span>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              )}
-
-              {/* Pagination */}
-              {mounted && pagination && pagination.totalPages > 1 && (
-                <div className="flex items-center justify-center gap-2 mt-8">
-                  <button
-                    onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                    className="px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors disabled:opacity-50"
-                    disabled={currentPage === 1}
-                  >
-                    পূর্ববর্তী
-                  </button>
-
-                  {currentPage > 2 && (
-                    <>
-                      <button
-                        onClick={() => setCurrentPage(1)}
-                        className="px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors"
-                      >
-                        1
-                      </button>
-                      {currentPage > 3 && <span className="px-2">...</span>}
-                    </>
-                  )}
-
-                  {[currentPage - 1, currentPage, currentPage + 1]
-                    .filter((p) => p >= 1 && p <= pagination.totalPages)
-                    .map((p) => (
-                      <button
-                        key={p}
-                        onClick={() => setCurrentPage(p)}
-                        className={`px-4 py-2 rounded-lg border transition-colors ${p === currentPage ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-muted"}`}
-                      >
-                        {p}
-                      </button>
+                      </Link>
                     ))}
+                  </div>
 
-                  {currentPage < pagination.totalPages - 1 && (
-                    <>
-                      {currentPage < pagination.totalPages - 2 && <span className="px-2">...</span>}
+                  {/* Pagination */}
+                  {pagination && pagination.totalPages > 1 && (
+                    <div className="flex justify-center items-center gap-2 mt-8">
                       <button
-                        onClick={() => setCurrentPage(pagination.totalPages)}
-                        className="px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors"
+                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                        className="px-4 py-2 rounded-lg border border-border bg-card hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
-                        {pagination.totalPages}
+                        পূর্ববর্তী
                       </button>
-                    </>
+                      <span className="px-4 py-2 text-sm">
+                        {currentPage} / {pagination.totalPages}
+                      </span>
+                      <button
+                        onClick={() => setCurrentPage((p) => Math.min(pagination.totalPages, p + 1))}
+                        disabled={currentPage === pagination.totalPages}
+                        className="px-4 py-2 rounded-lg border border-border bg-card hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        পরবর্তী
+                      </button>
+                    </div>
                   )}
-
-                  <button
-                    onClick={() => setCurrentPage((prev) => Math.min(pagination.totalPages, prev + 1))}
-                    className="px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors disabled:opacity-50"
-                    disabled={currentPage === pagination.totalPages}
-                  >
-                    পরবর্তী
-                  </button>
-                </div>
+                </>
               )}
             </div>
           </div>
         </div>
 
-        {/* Mobile Filters Drawer */}
+        {/* Mobile Filter Drawer */}
         {mobileFiltersOpen && (
           <div className="fixed inset-0 z-50 lg:hidden">
-            <div
-              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-              onClick={() => setMobileFiltersOpen(false)}
-            />
-            <div className="absolute right-0 top-0 bottom-0 w-full max-w-sm bg-card shadow-xl animate-in slide-in-from-right">
-              <div className="flex items-center justify-between p-4 border-b border-border">
+            <div className="absolute inset-0 bg-black/50" onClick={() => setMobileFiltersOpen(false)} />
+            <div className="absolute right-0 top-0 bottom-0 w-80 max-w-full bg-card shadow-xl overflow-y-auto">
+              <div className="sticky top-0 bg-card border-b border-border p-4 flex items-center justify-between">
                 <h2 className="font-bold text-lg">ফিল্টার</h2>
                 <button
                   onClick={() => setMobileFiltersOpen(false)}
@@ -568,15 +584,15 @@ function SearchContent() {
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              <div className="p-4 overflow-y-auto h-[calc(100vh-140px)]">
+              <div className="p-4">
                 <FiltersPanel />
               </div>
-              <div className="absolute bottom-0 left-0 right-0 p-4 bg-card border-t border-border">
+              <div className="sticky bottom-0 bg-card border-t border-border p-4">
                 <button
                   onClick={() => setMobileFiltersOpen(false)}
-                  className="w-full bg-primary text-primary-foreground font-semibold py-3 rounded-xl hover:bg-primary/90 transition-colors"
+                  className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-medium hover:bg-primary/90 transition-colors"
                 >
-                  ফিল্টার প্রয়োগ করুন
+                  ফলাফল দেখুন
                 </button>
               </div>
             </div>
@@ -592,7 +608,7 @@ export default function SearchPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <Loader2 className="w-10 h-10 animate-spin text-primary" />
         </div>
       }
     >

@@ -1,109 +1,314 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
-import { MosqueDome, CrescentMoon, Lantern } from "./islamic-pattern"
-import { ArrowRight, Heart, Users, Shield } from "lucide-react"
+import { Heart, Search, ChevronDown, Briefcase, GraduationCap, Calendar } from "lucide-react"
 import Link from "next/link"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+
+const FREELANCER_PROFESSIONS = [
+  "ওয়েব ডেভেলপার",
+  "গ্রাফিক ডিজাইনার",
+  "ডিজিটাল মার্কেটার",
+  "কন্টেন্ট রাইটার",
+  "ভিডিও এডিটর",
+  "UI/UX ডিজাইনার",
+  "মোবাইল অ্যাপ ডেভেলপার",
+  "SEO এক্সপার্ট",
+  "সোশ্যাল মিডিয়া ম্যানেজার",
+  "ডাটা এন্ট্রি অপারেটর",
+  "ভার্চুয়াল অ্যাসিস্ট্যান্ট",
+  "ওয়ার্ডপ্রেস ডেভেলপার",
+  "ই-কমার্স ম্যানেজার",
+  "ভয়েস ওভার আর্টিস্ট",
+  "ট্রান্সলেটর",
+  "ফটোগ্রাফার",
+  "মোশন গ্রাফিক্স ডিজাইনার",
+  "থ্রিডি ডিজাইনার",
+  "সফটওয়্যার ইঞ্জিনিয়ার",
+  "ডাটা সায়েন্টিস্ট",
+  "অন্যান্য ফ্রিল্যান্সার",
+]
+
+export { FREELANCER_PROFESSIONS }
 
 export function HeroSection() {
+  const router = useRouter()
+  const [lookingFor, setLookingFor] = useState("")
+  const [maritalStatus, setMaritalStatus] = useState("")
+  const [location, setLocation] = useState("")
+  const [ageMin, setAgeMin] = useState("")
+  const [ageMax, setAgeMax] = useState("")
+  const [profession, setProfession] = useState("")
+  const [education, setEducation] = useState("")
+  const [showAdvanced, setShowAdvanced] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const handleSearch = () => {
+    const params = new URLSearchParams()
+    if (lookingFor) params.set("type", lookingFor)
+    if (maritalStatus) params.set("status", maritalStatus)
+    if (location) params.set("location", location)
+    if (ageMin) params.set("ageMin", ageMin)
+    if (ageMax) params.set("ageMax", ageMax)
+    if (profession) params.set("profession", profession)
+    if (education) params.set("education", education)
+    router.push(`/search?${params.toString()}`)
+  }
+
+  const educationLevels = ["এসএসসি", "এইচএসসি", "ডিপ্লোমা", "অনার্স", "মাস্টার্স", "পিএইচডি"]
+
   return (
-    <section
-      id="home"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary/5 via-background to-secondary/10 pt-16 md:pt-20"
-    >
-      {/* Islamic Pattern Overlay */}
-      <div className="absolute inset-0 opacity-[0.03]">
-        <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <defs>
-            <pattern id="hero-pattern" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
-              <path
-                d="M5 0L10 5L5 10L0 5Z"
-                stroke="currentColor"
-                strokeWidth="0.3"
-                fill="none"
-                className="text-primary"
-              />
-            </pattern>
-          </defs>
-          <rect width="100" height="100" fill="url(#hero-pattern)" />
-        </svg>
-      </div>
-
-      {/* Decorative Elements - Hidden on smaller screens */}
-      <Lantern className="absolute top-32 left-[5%] w-10 h-14 md:w-14 md:h-20 text-accent/30 animate-float hidden md:block" />
-      <Lantern
-        className="absolute top-40 right-[8%] w-8 h-12 md:w-10 md:h-16 text-accent/20 animate-float hidden lg:block"
-        style={{ animationDelay: "2s" }}
-      />
-      <CrescentMoon className="absolute top-24 right-[20%] w-12 h-12 md:w-16 md:h-16 text-secondary/40 animate-glow hidden md:block" />
-
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-4xl hidden lg:block">
-        <MosqueDome className="w-full h-auto text-primary/10" />
-      </div>
-
-      {/* Soft Glow Effects - Smaller on mobile */}
-      <div className="absolute top-1/3 left-1/4 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-primary/5 rounded-full blur-[80px] md:blur-[100px]" />
-      <div className="absolute bottom-1/3 right-1/4 w-[250px] md:w-[400px] h-[250px] md:h-[400px] bg-secondary/10 rounded-full blur-[80px] md:blur-[100px]" />
-
-      <div className="relative z-10 container mx-auto px-4 py-12 md:py-20">
-        <div className="max-w-4xl mx-auto text-center space-y-6 md:space-y-8">
-          <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm text-primary font-medium">
-            <Heart className="w-3 h-3 md:w-4 md:h-4" />
-            <span>বিশ্বস্ত ইসলামী ম্যাট্রিমনি প্ল্যাটফর্ম</span>
+    <section className="hero-bg py-16 md:py-24 px-4 text-center relative overflow-hidden">
+      {/* Decorative Elements */}
+      {mounted && (
+        <>
+          <div className="absolute top-10 left-10 text-pink-200 opacity-50 animate-bounce-slow hidden md:block">
+            <Heart className="w-16 h-16 fill-current" />
           </div>
-
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-foreground leading-[1.15] text-balance">
-            সঠিক জীবনসঙ্গী খুঁজুন, <span className="text-primary">হালাল পথে</span>
-          </h1>
-
-          <p className="text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed text-pretty px-4 md:px-0">
-            ইসলামী মূল্যবোধে গড়া, নিরাপদ ও বিশ্বস্ত ম্যাট্রিমনি প্ল্যাটফর্ম। আপনার পরিবারের জন্য সঠিক সঙ্গী খুঁজে পেতে আমরা প্রতিশ্রুতিবদ্ধ।
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center pt-2 md:pt-4 px-4 md:px-0">
-            <Link href="/register">
-              <Button
-                size="lg"
-                className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground px-6 md:px-8 h-12 md:h-14 text-base md:text-lg rounded-full shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 transition-all group"
-              >
-                বায়োডাটা তৈরি করুন
-                <ArrowRight className="w-4 h-4 md:w-5 md:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
-            <Link href="/search">
-              <Button
-                size="lg"
-                variant="outline"
-                className="w-full sm:w-auto border-2 border-primary/30 text-primary hover:bg-primary/5 px-6 md:px-8 h-12 md:h-14 text-base md:text-lg rounded-full bg-background/50 backdrop-blur-sm"
-              >
-                প্রোফাইল দেখুন
-              </Button>
-            </Link>
+          <div className="absolute bottom-10 right-10 text-pink-200 opacity-50 animate-pulse hidden md:block">
+            <Heart className="w-24 h-24 fill-current" />
           </div>
+        </>
+      )}
 
-          <div className="pt-8 md:pt-12 grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-6 max-w-2xl mx-auto px-4 md:px-0">
-            <div className="flex items-center justify-center gap-2 md:gap-3 bg-card/50 backdrop-blur-sm rounded-lg md:rounded-xl p-3 md:p-4 border border-border/50">
-              <Shield className="w-4 h-4 md:w-5 md:h-5 text-primary shrink-0" />
-              <span className="text-xs md:text-sm font-medium text-foreground">গোপনীয়তা রক্ষা</span>
-            </div>
-            <div className="flex items-center justify-center gap-2 md:gap-3 bg-card/50 backdrop-blur-sm rounded-lg md:rounded-xl p-3 md:p-4 border border-border/50">
-              <Users className="w-4 h-4 md:w-5 md:h-5 text-primary shrink-0" />
-              <span className="text-xs md:text-sm font-medium text-foreground">যাচাইকৃত প্রোফাইল</span>
-            </div>
-            <div className="flex items-center justify-center gap-2 md:gap-3 bg-card/50 backdrop-blur-sm rounded-lg md:rounded-xl p-3 md:p-4 border border-border/50">
-              <Heart className="w-4 h-4 md:w-5 md:h-5 text-primary shrink-0" />
-              <span className="text-xs md:text-sm font-medium text-foreground">পারিবারিক মানের মিল</span>
-            </div>
-          </div>
+      <div className="max-w-5xl mx-auto relative z-10">
+        {/* Badge */}
+        <div
+          className={`inline-flex items-center gap-2 bg-white px-4 py-1 rounded-full shadow-sm text-pink-600 text-sm font-bold mb-6 transition-all duration-700 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+            }`}
+        >
+          <Heart className="w-3 h-3 fill-current" />
+          <span>শুধুমাত্র ফ্রিল্যান্সারদের জন্য</span>
         </div>
-      </div>
 
-      {/* Bottom Wave Divider */}
-      <div className="absolute bottom-0 left-0 right-0">
-        <svg viewBox="0 0 1440 120" fill="none" className="w-full h-auto">
-          <path
-            d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z"
-            className="fill-background"
-          />
-        </svg>
+        {/* Title */}
+        <h2
+          className={`text-4xl md:text-6xl font-bold text-gray-900 mb-4 leading-tight transition-all duration-700 delay-100 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+            }`}
+        >
+          ফ্রিল্যান্সারদের <span className="text-pink-600">জীবনসঙ্গী</span> খুঁজুন
+        </h2>
+
+        {/* Subtitle */}
+        <p
+          className={`text-gray-600 text-lg md:text-xl mb-12 max-w-2xl mx-auto transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+            }`}
+        >
+          ফ্রিল্যান্সারদের জীবনের ব্যস্ততা আমরা বুঝি। তাই আপনার অনন্তকালের জীবনসঙ্গীর জন্য আমাদের এই ক্ষুদ্র প্রচেষ্টা।
+        </p>
+
+        {/* Search Box */}
+        <div
+          className={`bg-white p-4 md:p-6 rounded-2xl shadow-xl shadow-pink-100 border border-pink-50 max-w-5xl mx-auto relative z-20 transition-all duration-700 delay-300 ${mounted ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-8 scale-95"
+            }`}
+        >
+          {/* Basic Search Fields */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            {/* Biodata Type */}
+            <div className="relative text-left w-full">
+              <label className="block text-sm font-bold text-pink-600 mb-2 flex items-center gap-2">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+                বায়োডাটার ধরণ
+              </label>
+              <div className="relative">
+                <select
+                  value={lookingFor}
+                  onChange={(e) => setLookingFor(e.target.value)}
+                  className="w-full appearance-none bg-gray-50 border border-gray-200 hover:border-pink-300 cursor-pointer rounded-xl py-3 px-4 pr-10 text-gray-800 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition"
+                >
+                  <option value="">নির্বাচন করুন</option>
+                  <option value="groom">পাত্রের বায়োডাটা</option>
+                  <option value="bride">পাত্রীর বায়োডাটা</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Marital Status */}
+            <div className="relative text-left w-full">
+              <label className="block text-sm font-bold text-pink-600 mb-2 flex items-center gap-2">
+                <Heart className="w-4 h-4" />
+                বৈবাহিক অবস্থা
+              </label>
+              <div className="relative">
+                <select
+                  value={maritalStatus}
+                  onChange={(e) => setMaritalStatus(e.target.value)}
+                  className="w-full appearance-none bg-gray-50 border border-gray-200 hover:border-pink-300 cursor-pointer rounded-xl py-3 px-4 pr-10 text-gray-800 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition"
+                >
+                  <option value="">নির্বাচন করুন</option>
+                  <option value="unmarried">অবিবাহিত</option>
+                  <option value="divorced">ডিভোর্সড</option>
+                  <option value="widow">বিধবা</option>
+                  <option value="widower">বিপত্নীক</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Division */}
+            <div className="relative text-left w-full">
+              <label className="block text-sm font-bold text-pink-600 mb-2 flex items-center gap-2">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+                বিভাগ
+              </label>
+              <div className="relative">
+                <select
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className="w-full appearance-none bg-gray-50 border border-gray-200 hover:border-pink-300 cursor-pointer rounded-xl py-3 px-4 pr-10 text-gray-800 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition"
+                >
+                  <option value="">নির্বাচন করুন</option>
+                  <option value="ঢাকা">ঢাকা</option>
+                  <option value="চট্টগ্রাম">চট্টগ্রাম</option>
+                  <option value="রাজশাহী">রাজশাহী</option>
+                  <option value="খুলনা">খুলনা</option>
+                  <option value="বরিশাল">বরিশাল</option>
+                  <option value="সিলেট">সিলেট</option>
+                  <option value="রংপুর">রংপুর</option>
+                  <option value="ময়মনসিংহ">ময়মনসিংহ</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Search Button */}
+            <button
+              onClick={handleSearch}
+              className="bg-pink-600 hover:bg-pink-700 text-white h-[50px] rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition shadow-lg active:scale-95 w-full"
+            >
+              <Search className="w-5 h-5" />
+              খুঁজুন
+            </button>
+          </div>
+
+          <button
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="mt-4 text-pink-600 hover:text-pink-700 text-sm font-medium flex items-center gap-1 mx-auto transition"
+          >
+            {showAdvanced ? "সাধারণ সার্চ" : "বিস্তারিত সার্চ"}
+            <ChevronDown className={`w-4 h-4 transition-transform ${showAdvanced ? "rotate-180" : ""}`} />
+          </button>
+
+          {showAdvanced && (
+            <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-1 md:grid-cols-4 gap-4 animate-in slide-in-from-top-2 duration-300">
+              {/* Age Range */}
+              <div className="relative text-left w-full">
+                <label className="block text-sm font-bold text-pink-600 mb-2 flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  বয়স (সর্বনিম্ন)
+                </label>
+                <div className="relative">
+                  <select
+                    value={ageMin}
+                    onChange={(e) => setAgeMin(e.target.value)}
+                    className="w-full appearance-none bg-gray-50 border border-gray-200 hover:border-pink-300 cursor-pointer rounded-xl py-3 px-4 pr-10 text-gray-800 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition"
+                  >
+                    <option value="">নির্বাচন করুন</option>
+                    {Array.from({ length: 43 }, (_, i) => i + 18).map((age) => (
+                      <option key={age} value={age}>
+                        {age} বছর
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Age Max */}
+              <div className="relative text-left w-full">
+                <label className="block text-sm font-bold text-pink-600 mb-2 flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  বয়স (সর্বোচ্চ)
+                </label>
+                <div className="relative">
+                  <select
+                    value={ageMax}
+                    onChange={(e) => setAgeMax(e.target.value)}
+                    className="w-full appearance-none bg-gray-50 border border-gray-200 hover:border-pink-300 cursor-pointer rounded-xl py-3 px-4 pr-10 text-gray-800 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition"
+                  >
+                    <option value="">নির্বাচন করুন</option>
+                    {Array.from({ length: 43 }, (_, i) => i + 18).map((age) => (
+                      <option key={age} value={age}>
+                        {age} বছর
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Profession - Updated to freelancer categories */}
+              <div className="relative text-left w-full">
+                <label className="block text-sm font-bold text-pink-600 mb-2 flex items-center gap-2">
+                  <Briefcase className="w-4 h-4" />
+                  ফ্রিল্যান্সিং পেশা
+                </label>
+                <div className="relative">
+                  <select
+                    value={profession}
+                    onChange={(e) => setProfession(e.target.value)}
+                    className="w-full appearance-none bg-gray-50 border border-gray-200 hover:border-pink-300 cursor-pointer rounded-xl py-3 px-4 pr-10 text-gray-800 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition"
+                  >
+                    <option value="">নির্বাচন করুন</option>
+                    {FREELANCER_PROFESSIONS.map((prof) => (
+                      <option key={prof} value={prof}>
+                        {prof}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Education */}
+              <div className="relative text-left w-full">
+                <label className="block text-sm font-bold text-pink-600 mb-2 flex items-center gap-2">
+                  <GraduationCap className="w-4 h-4" />
+                  শিক্ষাগত যোগ্যতা
+                </label>
+                <div className="relative">
+                  <select
+                    value={education}
+                    onChange={(e) => setEducation(e.target.value)}
+                    className="w-full appearance-none bg-gray-50 border border-gray-200 hover:border-pink-300 cursor-pointer rounded-xl py-3 px-4 pr-10 text-gray-800 focus:outline-none focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 transition"
+                  >
+                    <option value="">নির্বাচন করুন</option>
+                    {educationLevels.map((edu) => (
+                      <option key={edu} value={edu}>
+                        {edu}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* CTA Button */}
+        <div
+          className={`mt-8 transition-all duration-700 delay-400 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+            }`}
+        >
+          <Link href="/register">
+            <Button className="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2 rounded-full font-bold transition shadow-lg shadow-pink-200">
+              প্রোফাইল তৈরি করুন
+            </Button>
+          </Link>
+        </div>
       </div>
     </section>
   )

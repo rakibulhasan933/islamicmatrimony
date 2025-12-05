@@ -29,18 +29,20 @@ import {
   Loader2,
 } from "lucide-react"
 import type { User as UserType, Biodata } from "@/lib/db/schema"
+import { FREELANCER_PROFESSIONS } from "@/components/hero-section"
 
 interface BiodataFormProps {
   user: UserType
   existingBiodata: Biodata | null
 }
 
-type FormStep = "personal" | "family" | "education" | "religious" | "partner" | "contact"
+type FormStep = "personal" | "family" | "education" | "freelancing" | "religious" | "partner" | "contact"
 
 const steps: { id: FormStep; title: string; icon: React.ReactNode }[] = [
   { id: "personal", title: "ব্যক্তিগত তথ্য", icon: <User className="w-4 h-4" /> },
   { id: "family", title: "পারিবারিক তথ্য", icon: <Heart className="w-4 h-4" /> },
-  { id: "education", title: "শিক্ষা ও পেশা", icon: <FileText className="w-4 h-4" /> },
+  { id: "education", title: "শিক্ষা", icon: <FileText className="w-4 h-4" /> },
+  { id: "freelancing", title: "ফ্রিল্যান্সিং", icon: <Settings className="w-4 h-4" /> },
   { id: "religious", title: "ধর্মীয় তথ্য", icon: <Bell className="w-4 h-4" /> },
   { id: "partner", title: "প্রত্যাশিত জীবনসঙ্গী", icon: <Heart className="w-4 h-4" /> },
   { id: "contact", title: "যোগাযোগ", icon: <Settings className="w-4 h-4" /> },
@@ -74,6 +76,9 @@ export function BiodataForm({ user, existingBiodata }: BiodataFormProps) {
     occupation: existingBiodata?.occupation || "",
     occupationDetails: existingBiodata?.occupationDetails || "",
     monthlyIncome: existingBiodata?.monthlyIncome || "",
+    freelancingPlatform: (existingBiodata as any)?.freelancingPlatform || "",
+    freelancingExperience: (existingBiodata as any)?.freelancingExperience || "",
+    portfolioLink: (existingBiodata as any)?.portfolioLink || "",
     fatherName: existingBiodata?.fatherName || "",
     fatherOccupation: existingBiodata?.fatherOccupation || "",
     motherName: existingBiodata?.motherName || "",
@@ -181,7 +186,7 @@ export function BiodataForm({ user, existingBiodata }: BiodataFormProps) {
           <Menu className="w-6 h-6" />
         </button>
         <Link href="/" className="text-xl font-bold text-primary">
-          নিকাহ
+          FreelancerMarriage
         </Link>
         <div className="w-10" />
       </header>
@@ -193,12 +198,13 @@ export function BiodataForm({ user, existingBiodata }: BiodataFormProps) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-full w-72 bg-card border-r border-border z-50 transform transition-transform duration-300 lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+        className={`fixed top-0 left-0 h-full w-72 bg-card border-r border-border z-50 transform transition-transform duration-300 lg:translate-x-0 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
         <div className="flex items-center justify-between h-16 px-6 border-b border-border">
           <Link href="/" className="text-xl font-bold text-primary">
-            নিকাহ
+            FreelancerMarriage
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}
@@ -237,10 +243,11 @@ export function BiodataForm({ user, existingBiodata }: BiodataFormProps) {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${item.active
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+                item.active
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
             >
               <item.icon className="w-5 h-5" />
               <span className="font-medium">{item.label}</span>
@@ -272,7 +279,7 @@ export function BiodataForm({ user, existingBiodata }: BiodataFormProps) {
             <p className="text-muted-foreground mt-1 text-sm md:text-base">সঠিক তথ্য দিয়ে আপনার বায়োডাটা সম্পূর্ণ করুন</p>
           </div>
 
-          {/* Step Progress - Improved responsive design */}
+          {/* Step Progress */}
           <div className="mb-6 md:mb-8 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0">
             <div className="flex items-center gap-2 md:gap-0 min-w-max md:min-w-0">
               {steps.map((step, index) => (
@@ -280,20 +287,22 @@ export function BiodataForm({ user, existingBiodata }: BiodataFormProps) {
                   <button
                     type="button"
                     onClick={() => setCurrentStep(step.id)}
-                    className={`flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-full text-xs md:text-sm font-medium transition-all ${currentStep === step.id
-                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
-                      : index < currentStepIndex
-                        ? "bg-primary/20 text-primary"
-                        : "bg-muted text-muted-foreground hover:bg-muted/80"
-                      }`}
+                    className={`flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 rounded-full text-xs md:text-sm font-medium transition-all ${
+                      currentStep === step.id
+                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
+                        : index < currentStepIndex
+                          ? "bg-primary/20 text-primary"
+                          : "bg-muted text-muted-foreground hover:bg-muted/80"
+                    }`}
                   >
                     <span className="hidden sm:inline">{step.icon}</span>
                     <span className="whitespace-nowrap">{step.title}</span>
                   </button>
                   {index < steps.length - 1 && (
                     <div
-                      className={`hidden md:block w-6 lg:w-10 h-0.5 mx-1 ${index < currentStepIndex ? "bg-primary" : "bg-border"
-                        }`}
+                      className={`hidden md:block w-6 lg:w-8 h-0.5 mx-1 ${
+                        index < currentStepIndex ? "bg-primary" : "bg-border"
+                      }`}
                     />
                   )}
                 </div>
@@ -662,11 +671,11 @@ export function BiodataForm({ user, existingBiodata }: BiodataFormProps) {
                 </div>
               )}
 
-              {/* Education & Career Step */}
+              {/* Education Step */}
               {currentStep === "education" && (
                 <div className="space-y-6">
                   <h2 className="text-lg md:text-xl font-semibold text-foreground border-b border-border pb-4">
-                    শিক্ষা ও পেশা
+                    শিক্ষাগত যোগ্যতা
                   </h2>
 
                   <div className="space-y-2">
@@ -681,15 +690,12 @@ export function BiodataForm({ user, existingBiodata }: BiodataFormProps) {
                       className="w-full h-11 px-3 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                     >
                       <option value="">নির্বাচন করুন</option>
-                      <option value="এসএসসি/সমমান">এসএসসি/সমমান</option>
-                      <option value="এইচএসসি/সমমান">এইচএসসি/সমমান</option>
+                      <option value="এসএসসি">এসএসসি</option>
+                      <option value="এইচএসসি">এইচএসসি</option>
                       <option value="ডিপ্লোমা">ডিপ্লোমা</option>
-                      <option value="স্নাতক">স্নাতক</option>
-                      <option value="স্নাতকোত্তর">স্নাতকোত্তর</option>
+                      <option value="অনার্স">অনার্স</option>
+                      <option value="মাস্টার্স">মাস্টার্স</option>
                       <option value="পিএইচডি">পিএইচডি</option>
-                      <option value="হাফেজ">হাফেজ</option>
-                      <option value="আলেম">আলেম</option>
-                      <option value="অন্যান্য">অন্যান্য</option>
                     </select>
                   </div>
 
@@ -707,10 +713,24 @@ export function BiodataForm({ user, existingBiodata }: BiodataFormProps) {
                       className="resize-none"
                     />
                   </div>
+                </div>
+              )}
+
+              {currentStep === "freelancing" && (
+                <div className="space-y-6">
+                  <h2 className="text-lg md:text-xl font-semibold text-foreground border-b border-border pb-4">
+                    ফ্রিল্যান্সিং তথ্য
+                  </h2>
+
+                  <div className="bg-pink-50 border border-pink-200 rounded-lg p-4 mb-4">
+                    <p className="text-sm text-pink-700">
+                      এই প্ল্যাটফর্মটি শুধুমাত্র ফ্রিল্যান্সারদের জন্য। অনুগ্রহ করে আপনার ফ্রিল্যান্সিং সম্পর্কিত সঠিক তথ্য দিন।
+                    </p>
+                  </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="occupation" className="text-sm font-medium">
-                      পেশা
+                      ফ্রিল্যান্সিং পেশা *
                     </Label>
                     <select
                       id="occupation"
@@ -718,46 +738,108 @@ export function BiodataForm({ user, existingBiodata }: BiodataFormProps) {
                       value={formData.occupation}
                       onChange={handleSelectChange}
                       className="w-full h-11 px-3 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                      required
                     >
                       <option value="">নির্বাচন করুন</option>
-                      <option value="চাকরিজীবী">চাকরিজীবী</option>
-                      <option value="ব্যবসায়ী">ব্যবসায়ী</option>
-                      <option value="ডাক্তার">ডাক্তার</option>
-                      <option value="ইঞ্জিনিয়ার">ইঞ্জিনিয়ার</option>
-                      <option value="শিক্ষক">শিক্ষক</option>
-                      <option value="ছাত্র/ছাত্রী">ছাত্র/ছাত্রী</option>
-                      <option value="গৃহিণী">গৃহিণী</option>
-                      <option value="প্রবাসী">প্রবাসী</option>
+                      {FREELANCER_PROFESSIONS.map((prof) => (
+                        <option key={prof} value={prof}>
+                          {prof}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="freelancingPlatform" className="text-sm font-medium">
+                      কোন প্ল্যাটফর্মে কাজ করেন
+                    </Label>
+                    <select
+                      id="freelancingPlatform"
+                      name="freelancingPlatform"
+                      value={formData.freelancingPlatform}
+                      onChange={handleSelectChange}
+                      className="w-full h-11 px-3 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                      <option value="">নির্বাচন করুন</option>
+                      <option value="Upwork">Upwork</option>
+                      <option value="Fiverr">Fiverr</option>
+                      <option value="Freelancer.com">Freelancer.com</option>
+                      <option value="Toptal">Toptal</option>
+                      <option value="99designs">99designs</option>
+                      <option value="PeoplePerHour">PeoplePerHour</option>
+                      <option value="Guru">Guru</option>
+                      <option value="লোকাল ক্লায়েন্ট">লোকাল ক্লায়েন্ট</option>
+                      <option value="একাধিক প্ল্যাটফর্ম">একাধিক প্ল্যাটফর্ম</option>
                       <option value="অন্যান্য">অন্যান্য</option>
                     </select>
                   </div>
 
                   <div className="space-y-2">
+                    <Label htmlFor="freelancingExperience" className="text-sm font-medium">
+                      ফ্রিল্যান্সিং অভিজ্ঞতা
+                    </Label>
+                    <select
+                      id="freelancingExperience"
+                      name="freelancingExperience"
+                      value={formData.freelancingExperience}
+                      onChange={handleSelectChange}
+                      className="w-full h-11 px-3 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                      <option value="">নির্বাচন করুন</option>
+                      <option value="১ বছরের কম">১ বছরের কম</option>
+                      <option value="১-২ বছর">১-২ বছর</option>
+                      <option value="২-৩ বছর">২-৩ বছর</option>
+                      <option value="৩-৫ বছর">৩-৫ বছর</option>
+                      <option value="৫+ বছর">৫+ বছর</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="monthlyIncome" className="text-sm font-medium">
+                      মাসিক আয় (গড়ে)
+                    </Label>
+                    <select
+                      id="monthlyIncome"
+                      name="monthlyIncome"
+                      value={formData.monthlyIncome}
+                      onChange={handleSelectChange}
+                      className="w-full h-11 px-3 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                      <option value="">নির্বাচন করুন</option>
+                      <option value="২০,০০০ এর কম">২০,০০০ এর কম</option>
+                      <option value="২০,০০০ - ৫০,০০০">২০,০০০ - ৫০,০০০</option>
+                      <option value="৫০,০০০ - ১,০০,০০০">৫০,০০০ - ১,০০,০০০</option>
+                      <option value="১,০০,০০০ - ২,০০,০০০">১,০০,০০০ - ২,০০,০০০</option>
+                      <option value="২,০০,০০০+">২,০০,০০০+</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="portfolioLink" className="text-sm font-medium">
+                      পোর্টফোলিও লিংক (ঐচ্ছিক)
+                    </Label>
+                    <Input
+                      id="portfolioLink"
+                      name="portfolioLink"
+                      value={formData.portfolioLink}
+                      onChange={handleChange}
+                      placeholder="https://yourportfolio.com"
+                      className="h-11"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
                     <Label htmlFor="occupationDetails" className="text-sm font-medium">
-                      পেশার বিস্তারিত
+                      কাজের বিস্তারিত
                     </Label>
                     <Textarea
                       id="occupationDetails"
                       name="occupationDetails"
                       value={formData.occupationDetails}
                       onChange={handleChange}
-                      placeholder="আপনার কর্মস্থল, পদবী ইত্যাদি"
-                      rows={3}
+                      placeholder="আপনার ফ্রিল্যান্সিং কাজ সম্পর্কে বিস্তারিত লিখুন - কি ধরনের প্রজেক্ট করেন, কোন টেকনোলজি/টুল ব্যবহার করেন ইত্যাদি"
+                      rows={4}
                       className="resize-none"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="monthlyIncome" className="text-sm font-medium">
-                      মাসিক আয়
-                    </Label>
-                    <Input
-                      id="monthlyIncome"
-                      name="monthlyIncome"
-                      value={formData.monthlyIncome}
-                      onChange={handleChange}
-                      placeholder="যেমন: ৫০,০০০ টাকা"
-                      className="h-11"
                     />
                   </div>
                 </div>
@@ -899,7 +981,7 @@ export function BiodataForm({ user, existingBiodata }: BiodataFormProps) {
                         name="expectedDistrict"
                         value={formData.expectedDistrict}
                         onChange={handleChange}
-                        placeholder="যেমন: ঢাকা বিভাগ"
+                        placeholder="যে কোন জেলা / নির্দিষ্ট জেলা"
                         className="h-11"
                       />
                     </div>
@@ -918,9 +1000,9 @@ export function BiodataForm({ user, existingBiodata }: BiodataFormProps) {
                     >
                       <option value="">নির্বাচন করুন</option>
                       <option value="অবিবাহিত">অবিবাহিত</option>
-                      <option value="তালাকপ্রাপ্ত">তালাকপ্রাপ্ত</option>
+                      <option value="ডিভোর্সড">ডিভোর্সড</option>
                       <option value="বিধবা/বিপত্নীক">বিধবা/বিপত্নীক</option>
-                      <option value="যেকোনো">যেকোনো</option>
+                      <option value="যে কোন">যে কোন</option>
                     </select>
                   </div>
 
@@ -933,7 +1015,7 @@ export function BiodataForm({ user, existingBiodata }: BiodataFormProps) {
                       name="partnerQualities"
                       value={formData.partnerQualities}
                       onChange={handleChange}
-                      placeholder="জীবনসঙ্গীর কাছে আপনার প্রত্যাশা বিস্তারিত লিখুন"
+                      placeholder="আপনার জীবনসঙ্গীর কাছ থেকে কী কী গুণাবলী প্রত্যাশা করেন"
                       rows={4}
                       className="resize-none"
                     />
@@ -941,36 +1023,35 @@ export function BiodataForm({ user, existingBiodata }: BiodataFormProps) {
                 </div>
               )}
 
-              {/* Contact Step */}
+              {/* Contact Info Step */}
               {currentStep === "contact" && (
                 <div className="space-y-6">
                   <h2 className="text-lg md:text-xl font-semibold text-foreground border-b border-border pb-4">
                     যোগাযোগের তথ্য
                   </h2>
 
-                  <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 mb-6">
-                    <p className="text-sm text-foreground">
-                      <strong>গোপনীয়তা:</strong> আপনার যোগাযোগের তথ্য শুধুমাত্র অনুমোদিত ব্যবহারকারীদের দেখানো হবে।
-                    </p>
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+                    <p className="text-sm text-amber-700">অভিভাবকের ফোন নম্বরটি শুধুমাত্র প্রিমিয়াম সদস্যরা দেখতে পারবেন।</p>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="guardianPhone" className="text-sm font-medium">
-                        অভিভাবকের মোবাইল নম্বর
+                        অভিভাবকের ফোন নম্বর *
                       </Label>
                       <Input
                         id="guardianPhone"
                         name="guardianPhone"
                         value={formData.guardianPhone}
                         onChange={handleChange}
-                        placeholder="০১XXXXXXXXX"
+                        placeholder="০১৭XXXXXXXX"
+                        required
                         className="h-11"
                       />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="guardianRelation" className="text-sm font-medium">
-                        অভিভাবকের সম্পর্ক
+                        অভিভাবকের সাথে সম্পর্ক
                       </Label>
                       <select
                         id="guardianRelation"
@@ -986,55 +1067,53 @@ export function BiodataForm({ user, existingBiodata }: BiodataFormProps) {
                         <option value="বোন">বোন</option>
                         <option value="চাচা">চাচা</option>
                         <option value="মামা">মামা</option>
+                        <option value="নিজে">নিজে</option>
                         <option value="অন্যান্য">অন্যান্য</option>
                       </select>
                     </div>
                   </div>
-                </div>
-              )}
 
-              {/* Error Message */}
-              {error && (
-                <div className="mt-4 p-4 bg-destructive/10 border border-destructive/20 rounded-xl">
-                  <p className="text-sm text-destructive">{error}</p>
+                  {error && (
+                    <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4">
+                      <p className="text-sm text-destructive">{error}</p>
+                    </div>
+                  )}
                 </div>
               )}
 
               {/* Navigation Buttons */}
-              <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-4 mt-8 pt-6 border-t border-border">
+              <div className="flex justify-between mt-8 pt-6 border-t border-border">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={goToPrevStep}
                   disabled={currentStepIndex === 0}
-                  className="w-full sm:w-auto gap-2 h-11 bg-transparent"
+                  className="gap-2 bg-transparent"
                 >
                   <ChevronLeft className="w-4 h-4" />
                   পূর্ববর্তী
                 </Button>
 
-                <div className="flex gap-3 w-full sm:w-auto">
-                  {currentStepIndex === steps.length - 1 ? (
-                    <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto gap-2 h-11 px-6">
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          সংরক্ষণ হচ্ছে...
-                        </>
-                      ) : (
-                        <>
-                          <Save className="w-4 h-4" />
-                          বায়োডাটা সংরক্ষণ করুন
-                        </>
-                      )}
-                    </Button>
-                  ) : (
-                    <Button type="button" onClick={goToNextStep} className="w-full sm:w-auto gap-2 h-11 px-6">
-                      পরবর্তী
-                      <ChevronRight className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
+                {currentStep === "contact" ? (
+                  <Button type="submit" disabled={isSubmitting} className="gap-2 bg-primary hover:bg-primary/90">
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        সংরক্ষণ হচ্ছে...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4" />
+                        বায়োডাটা সংরক্ষণ করুন
+                      </>
+                    )}
+                  </Button>
+                ) : (
+                  <Button type="button" onClick={goToNextStep} className="gap-2">
+                    পরবর্তী
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
             </div>
           </form>

@@ -84,7 +84,7 @@ export function SearchSection() {
             {/* Search Button - Full width on mobile, auto on larger screens */}
             <button
               onClick={handleSearch}
-              className="flex items-center justify-center gap-2 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold py-3 md:py-3.5 px-6 rounded-lg md:rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] sm:col-span-2 lg:col-span-1 text-sm md:text-base"
+              className="flex items-center justify-center gap-2 bg-linear-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold py-3 md:py-3.5 px-6 rounded-lg md:rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] sm:col-span-2 lg:col-span-1 text-sm md:text-base"
             >
               <Search className="w-4 h-4 md:w-5 md:h-5" />
               <span>বায়োডাটা খুঁজুন</span>

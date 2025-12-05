@@ -4,7 +4,7 @@ import Link from "next/link"
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/10 p-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-primary/5 via-background to-secondary/10 p-4 relative overflow-hidden">
       {/* Decorative Elements */}
       <div className="absolute inset-0 opacity-[0.03]">
         <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -33,8 +33,8 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
-            <h1 className="text-2xl md:text-3xl font-bold text-primary">নিকাহ</h1>
-            <p className="text-sm text-muted-foreground">ইসলামী ম্যাট্রিমনি</p>
+            <h1 className="text-2xl md:text-3xl font-bold  text-pink-600">FreelancerMarriage</h1>
+            <p className="text-sm text-muted-foreground"> ফ্রিল্যান্সারদের বিশ্বস্ত মাধ্যম</p>
           </Link>
         </div>
 
