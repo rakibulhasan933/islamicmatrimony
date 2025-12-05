@@ -1,5 +1,3 @@
-
-
 export default function DashBoardLayout({
     children,
 }: Readonly<{

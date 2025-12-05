@@ -33,8 +33,8 @@ export default function RegisterPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
-            <h1 className="text-2xl md:text-3xl font-bold text-primary">নিকাহ</h1>
-            <p className="text-sm text-muted-foreground">ইসলামী ম্যাট্রিমনি</p>
+            <h1 className="text-2xl md:text-3xl font-bold  text-pink-600">FreelancerMarriage</h1>
+            <p className="text-sm text-muted-foreground"> ফ্রিল্যান্সারদের বিশ্বস্ত মাধ্যম</p>
           </Link>
         </div>
 

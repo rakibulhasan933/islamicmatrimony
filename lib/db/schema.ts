@@ -4,6 +4,8 @@ import { pgTable, serial, varchar, text, timestamp, integer, boolean, pgEnum } f
 export const genderEnum = pgEnum("gender", ["male", "female"])
 export const maritalStatusEnum = pgEnum("marital_status", ["unmarried", "divorced", "widow", "widower"])
 export const biodataTypeEnum = pgEnum("biodata_type", ["bride", "groom"])
+export const membershipTypeEnum = pgEnum("membership_type", ["free", "silver", "gold"])
+export const membershipStatusEnum = pgEnum("membership_status", ["active", "expired", "cancelled"])
 
 // Users table for authentication
 export const users = pgTable("users", {
@@ -12,8 +14,24 @@ export const users = pgTable("users", {
   password: varchar("password", { length: 255 }).notNull(),
   name: varchar("name", { length: 255 }).notNull(),
   phone: varchar("phone", { length: 20 }),
-  profileImage: text("profile_image"), // Added profileImage field for user avatar
+  profileImage: text("profile_image"),
   emailVerified: boolean("email_verified").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+})
+
+// Memberships table
+export const memberships = pgTable("memberships", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  type: membershipTypeEnum("type").notNull().default("free"),
+  status: membershipStatusEnum("status").notNull().default("active"),
+  contactViewsRemaining: integer("contact_views_remaining").default(0),
+  contactViewsTotal: integer("contact_views_total").default(0),
+  startsAt: timestamp("starts_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 })
@@ -26,7 +44,7 @@ export const biodatas = pgTable("biodatas", {
     .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
   type: biodataTypeEnum("type").notNull(),
-  photo: text("photo"), // Added photo field for biodata profile photo
+  photo: text("photo"),
 
   // Personal Info
   fullName: varchar("full_name", { length: 255 }).notNull(),
@@ -89,8 +107,36 @@ export const biodatas = pgTable("biodatas", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 })
 
+// Contact views table
+export const contactViews = pgTable("contact_views", {
+  id: serial("id").primaryKey(),
+  viewerUserId: integer("viewer_user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  biodataId: integer("biodata_id")
+    .references(() => biodatas.id, { onDelete: "cascade" })
+    .notNull(),
+  viewedAt: timestamp("viewed_at").defaultNow().notNull(),
+})
+
+// Shortlist table
+export const shortlists = pgTable("shortlists", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  biodataId: integer("biodata_id")
+    .references(() => biodatas.id, { onDelete: "cascade" })
+    .notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+})
+
 // Types
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
 export type Biodata = typeof biodatas.$inferSelect
 export type NewBiodata = typeof biodatas.$inferInsert
+export type Membership = typeof memberships.$inferSelect
+export type NewMembership = typeof memberships.$inferInsert
+export type ContactView = typeof contactViews.$inferSelect
+export type Shortlist = typeof shortlists.$inferSelect

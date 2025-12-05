@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
-import { biodatas } from "@/lib/db/schema"
-import { eq, and, gte, lte, ilike, or, sql } from "drizzle-orm"
+import { biodatas, memberships } from "@/lib/db/schema"
+import { eq, and, gte, lte, ilike, or, sql, inArray } from "drizzle-orm"
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,8 +13,10 @@ export async function GET(request: NextRequest) {
     const ageMin = searchParams.get("ageMin")
     const ageMax = searchParams.get("ageMax")
     const education = searchParams.get("education")
+    const profession = searchParams.get("profession")
     const page = Number.parseInt(searchParams.get("page") || "1")
     const limit = Number.parseInt(searchParams.get("limit") || "12")
+    const premiumOnly = searchParams.get("premium") === "true"
     const offset = (page - 1) * limit
 
     // Build conditions array
@@ -46,10 +48,26 @@ export async function GET(request: NextRequest) {
       conditions.push(ilike(biodatas.education, `%${education}%`))
     }
 
+    if (profession) {
+      conditions.push(ilike(biodatas.occupation, `%${profession}%`))
+    }
+
+    const goldMembers = await db
+      .select({ userId: memberships.userId })
+      .from(memberships)
+      .where(and(eq(memberships.type, "gold"), eq(memberships.status, "active")))
+
+    const goldUserIds = goldMembers.map((m) => m.userId)
+
+    if (premiumOnly && goldUserIds.length > 0) {
+      conditions.push(inArray(biodatas.userId, goldUserIds))
+    }
+
     const results = await db
       .select({
         id: biodatas.id,
         biodataNo: biodatas.biodataNo,
+        userId: biodatas.userId,
         type: biodatas.type,
         age: biodatas.age,
         height: biodatas.height,
@@ -66,6 +84,11 @@ export async function GET(request: NextRequest) {
       .limit(limit)
       .offset(offset)
 
+    const biodatasWithPremium = results.map((biodata) => ({
+      ...biodata,
+      isPremium: goldUserIds.includes(biodata.userId),
+    }))
+
     // Get total count
     const countResult = await db
       .select({ count: sql<number>`count(*)` })
@@ -75,7 +98,7 @@ export async function GET(request: NextRequest) {
     const total = countResult[0]?.count || 0
 
     return NextResponse.json({
-      biodatas: results,
+      biodatas: biodatasWithPremium,
       pagination: {
         page,
         limit,
