@@ -74,7 +74,7 @@ export default async function MembershipPage() {
       </div>
 
       {/* Current Membership Card */}
-      <div className="bg-gradient-to-br from-pink-50 to-white border border-pink-100 rounded-2xl p-6 mb-8">
+      <div className="bg-linear-to-br from-pink-50 to-white border border-pink-100 rounded-2xl p-6 mb-8">
         <div className="flex items-center justify-between mb-6">
           <div>
             <p className="text-sm text-gray-500 mb-1">বর্তমান প্যাকেজ</p>
@@ -84,22 +84,20 @@ export default async function MembershipPage() {
             </div>
           </div>
           <div
-            className={`p-4 rounded-full ${
-              membership?.type === "gold"
-                ? "bg-yellow-100"
-                : membership?.type === "silver"
-                  ? "bg-gray-100"
-                  : "bg-pink-100"
-            }`}
+            className={`p-4 rounded-full ${membership?.type === "gold"
+              ? "bg-yellow-100"
+              : membership?.type === "silver"
+                ? "bg-gray-100"
+                : "bg-pink-100"
+              }`}
           >
             <TypeIcon
-              className={`w-8 h-8 ${
-                membership?.type === "gold"
-                  ? "text-yellow-500"
-                  : membership?.type === "silver"
-                    ? "text-gray-500"
-                    : "text-pink-400"
-              }`}
+              className={`w-8 h-8 ${membership?.type === "gold"
+                ? "text-yellow-500"
+                : membership?.type === "silver"
+                  ? "text-gray-500"
+                  : "text-pink-400"
+                }`}
             />
           </div>
         </div>
@@ -155,7 +153,7 @@ export default async function MembershipPage() {
           <h3 className="text-xl font-bold text-gray-900 mb-2">আপগ্রেড করুন</h3>
           <p className="text-gray-600 mb-6">আরো কন্টাক্ট দেখতে সিলভার বা গোল্ড প্যাকেজে আপগ্রেড করুন</p>
           <Link href="/pricing">
-            <Button className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white">
+            <Button className="bg-linear-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white">
               প্যাকেজ দেখুন
             </Button>
           </Link>
