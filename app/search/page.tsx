@@ -19,10 +19,10 @@ import {
   SlidersHorizontal,
   Grid3X3,
   List,
-  Loader2,
   BadgeCheck,
 } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image"
 import { FREELANCER_PROFESSIONS } from "@/components/hero-section"
 
@@ -83,13 +83,67 @@ function CheckboxFilter({ label, checked, onChange }: { label: string; checked: 
     <label className="flex items-center gap-3 cursor-pointer group">
       <Checkbox
         checked={checked}
-        onCheckedChange={(checkedState) => {
-          onChange()
-        }}
+        onCheckedChange={() => onChange()}
         className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
       />
       <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">{label}</span>
     </label>
+  )
+}
+
+function BiodataCardSkeleton({ viewMode }: { viewMode: "grid" | "list" }) {
+  if (viewMode === "list") {
+    return (
+      <div className="flex bg-card border border-border rounded-xl overflow-hidden">
+        <Skeleton className="w-32 h-32 shrink-0" />
+        <div className="p-4 flex-1">
+          <div className="flex items-center justify-between mb-2">
+            <Skeleton className="w-32 h-5" />
+            <Skeleton className="w-5 h-5 rounded" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="w-24 h-4" />
+            <Skeleton className="w-32 h-4" />
+            <Skeleton className="w-28 h-4" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="bg-card border border-border rounded-xl overflow-hidden">
+      <Skeleton className="aspect-4/3 w-full" />
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-2">
+          <Skeleton className="w-32 h-5" />
+          <Skeleton className="w-5 h-5 rounded" />
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="w-24 h-4" />
+          <Skeleton className="w-32 h-4" />
+          <Skeleton className="w-full h-4" />
+          <Skeleton className="w-28 h-4" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function FilterSidebarSkeleton() {
+  return (
+    <div className="space-y-4">
+      {[...Array(5)].map((_, i) => (
+        <div key={i} className="border-b border-border pb-4">
+          <Skeleton className="w-32 h-5 mb-3" />
+          <div className="space-y-2">
+            <Skeleton className="w-full h-4" />
+            <Skeleton className="w-3/4 h-4" />
+            <Skeleton className="w-2/3 h-4" />
+          </div>
+        </div>
+      ))}
+    </div>
   )
 }
 
@@ -108,7 +162,7 @@ function SearchContent() {
     age: true,
     location: true,
     education: false,
-    profession: true, // Open profession filter by default for freelancer site
+    profession: true,
   })
 
   const [filters, setFilters] = useState({
@@ -146,6 +200,7 @@ function SearchContent() {
   const { data, error, isLoading } = useSWR<BiodataResponse>(mounted ? buildApiUrl() : null, fetcher, {
     revalidateOnFocus: false,
   })
+
   const toggleFilter = (key: keyof typeof openFilters) => {
     setOpenFilters((prev) => ({ ...prev, [key]: !prev[key] }))
   }
@@ -179,7 +234,6 @@ function SearchContent() {
     filters.profession.length
 
   const biodatas = data?.biodatas || []
-
   const pagination = data?.pagination
 
   const getMaritalStatusDisplay = (status: string | null) => {
@@ -332,7 +386,7 @@ function SearchContent() {
         </div>
       </FilterSection>
 
-      {/* Profession Filter - Updated to freelancer professions */}
+      {/* Profession Filter */}
       <FilterSection title="ফ্রিল্যান্সিং পেশা" isOpen={openFilters.profession} onToggle={() => toggleFilter("profession")}>
         <div className="space-y-2 max-h-64 overflow-y-auto">
           {FREELANCER_PROFESSIONS.map((prof) => (
@@ -395,7 +449,11 @@ function SearchContent() {
 
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground hidden sm:inline">
-                    {!mounted || isLoading ? "লোড হচ্ছে..." : `${pagination?.total || 0} টি বায়োডাটা পাওয়া গেছে`}
+                    {!mounted || isLoading ? (
+                      <Skeleton className="w-32 h-4 inline-block" />
+                    ) : (
+                      `${pagination?.total || 0} টি বায়োডাটা পাওয়া গেছে`
+                    )}
                   </span>
                   <div className="flex border border-border rounded-lg overflow-hidden">
                     <button
@@ -414,13 +472,15 @@ function SearchContent() {
                 </div>
               </div>
 
-              {/* Loading State */}
               {(!mounted || isLoading) && (
-                <div className="flex items-center justify-center py-20">
-                  <div className="text-center">
-                    <Loader2 className="w-10 h-10 animate-spin text-primary mx-auto mb-4" />
-                    <p className="text-muted-foreground">বায়োডাটা লোড হচ্ছে...</p>
-                  </div>
+                <div
+                  className={
+                    viewMode === "grid" ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6" : "flex flex-col gap-4"
+                  }
+                >
+                  {[...Array(6)].map((_, i) => (
+                    <BiodataCardSkeleton key={i} viewMode={viewMode} />
+                  ))}
                 </div>
               )}
 
@@ -456,12 +516,12 @@ function SearchContent() {
                         : "flex flex-col gap-4"
                     }
                   >
-                    {biodatas.map((biodata) => (
+                    {biodatas.map((biodata, index) => (
                       <Link
                         key={biodata.id}
                         href={`/biodata/${biodata.biodataNo}`}
-                        className={`group bg-card border border-border rounded-xl overflow-hidden hover:shadow-lg hover:border-primary/30 transition-all duration-300 ${viewMode === "list" ? "flex" : ""
-                          }`}
+                        className={`group bg-card border border-border rounded-xl overflow-hidden hover:shadow-lg hover:border-primary/30 transition-all duration-300 animate-in fade-in slide-in-from-bottom-4 ${viewMode === "list" ? "flex" : ""}`}
+                        style={{ animationDelay: `${index * 50}ms`, animationFillMode: "backwards" }}
                       >
                         {/* Photo */}
                         <div className={`relative bg-muted ${viewMode === "list" ? "w-32 shrink-0" : "aspect-4/3"}`}>
@@ -518,25 +578,27 @@ function SearchContent() {
                                 {biodata.occupation}
                               </p>
                             )}
-                            {biodata.currentDistrict && (
-                              <p className="flex items-center gap-2">
-                                <MapPin className="w-3.5 h-3.5 text-primary" />
-                                {biodata.currentDistrict}
-                              </p>
-                            )}
                             {biodata.education && (
                               <p className="flex items-center gap-2">
                                 <GraduationCap className="w-3.5 h-3.5 text-primary" />
                                 {biodata.education}
                               </p>
                             )}
+                            {biodata.currentDistrict && (
+                              <p className="flex items-center gap-2">
+                                <MapPin className="w-3.5 h-3.5 text-primary" />
+                                {biodata.currentDistrict}
+                              </p>
+                            )}
                           </div>
 
-                          <div className="mt-3 pt-3 border-t border-border">
-                            <span className="text-xs text-muted-foreground">
-                              {getMaritalStatusDisplay(biodata.maritalStatus)}
-                            </span>
-                          </div>
+                          {biodata.maritalStatus && (
+                            <div className="mt-3 pt-3 border-t border-border">
+                              <span className="text-xs bg-muted px-2 py-1 rounded-full text-muted-foreground">
+                                {getMaritalStatusDisplay(biodata.maritalStatus)}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </Link>
                     ))}
@@ -548,17 +610,33 @@ function SearchContent() {
                       <button
                         onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                         disabled={currentPage === 1}
-                        className="px-4 py-2 rounded-lg border border-border bg-card hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="px-4 py-2 border border-border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-muted transition-colors"
                       >
                         পূর্ববর্তী
                       </button>
-                      <span className="px-4 py-2 text-sm">
-                        {currentPage} / {pagination.totalPages}
-                      </span>
+
+                      <div className="flex items-center gap-1">
+                        {[...Array(Math.min(5, pagination.totalPages))].map((_, i) => {
+                          const pageNum = i + 1
+                          return (
+                            <button
+                              key={pageNum}
+                              onClick={() => setCurrentPage(pageNum)}
+                              className={`w-10 h-10 rounded-lg transition-colors ${currentPage === pageNum
+                                ? "bg-primary text-primary-foreground"
+                                : "hover:bg-muted border border-border"
+                                }`}
+                            >
+                              {pageNum}
+                            </button>
+                          )
+                        })}
+                      </div>
+
                       <button
                         onClick={() => setCurrentPage((p) => Math.min(pagination.totalPages, p + 1))}
                         disabled={currentPage === pagination.totalPages}
-                        className="px-4 py-2 rounded-lg border border-border bg-card hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="px-4 py-2 border border-border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-muted transition-colors"
                       >
                         পরবর্তী
                       </button>
@@ -570,11 +648,13 @@ function SearchContent() {
           </div>
         </div>
 
-        {/* Mobile Filter Drawer */}
+        {/* Mobile Filters Modal */}
         {mobileFiltersOpen && (
-          <div className="fixed inset-0 z-50 lg:hidden">
-            <div className="absolute inset-0 bg-black/50" onClick={() => setMobileFiltersOpen(false)} />
-            <div className="absolute right-0 top-0 bottom-0 w-80 max-w-full bg-card shadow-xl overflow-y-auto">
+          <div className="fixed inset-0 bg-black/50 z-50 lg:hidden" onClick={() => setMobileFiltersOpen(false)}>
+            <div
+              className="absolute right-0 top-0 h-full w-80 max-w-full bg-card overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="sticky top-0 bg-card border-b border-border p-4 flex items-center justify-between">
                 <h2 className="font-bold text-lg">ফিল্টার</h2>
                 <button
@@ -590,7 +670,7 @@ function SearchContent() {
               <div className="sticky bottom-0 bg-card border-t border-border p-4">
                 <button
                   onClick={() => setMobileFiltersOpen(false)}
-                  className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-medium hover:bg-primary/90 transition-colors"
+                  className="w-full bg-primary text-primary-foreground rounded-xl py-3 font-medium hover:bg-primary/90 transition-colors"
                 >
                   ফলাফল দেখুন
                 </button>
@@ -607,9 +687,28 @@ export default function SearchPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center">
-          <Loader2 className="w-10 h-10 animate-spin text-primary" />
-        </div>
+        <main className="min-h-screen bg-linear-to-b from-background to-muted/20 pt-20">
+          <div className="container mx-auto px-4 py-8">
+            <div className="mb-8">
+              <Skeleton className="w-64 h-10 mb-2" />
+              <Skeleton className="w-48 h-5" />
+            </div>
+            <div className="flex flex-col lg:flex-row gap-8">
+              <div className="hidden lg:block w-80 shrink-0">
+                <div className="bg-card border border-border rounded-xl p-6">
+                  <FilterSidebarSkeleton />
+                </div>
+              </div>
+              <div className="flex-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {[...Array(6)].map((_, i) => (
+                    <BiodataCardSkeleton key={i} viewMode="grid" />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
       }
     >
       <SearchContent />

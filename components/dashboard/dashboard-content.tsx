@@ -9,7 +9,6 @@ import {
   User,
   FileText,
   Heart,
-  Settings,
   LogOut,
   Menu,
   X,
@@ -92,9 +91,6 @@ export function DashboardContent() {
     { icon: FileText, label: "আমার বায়োডাটা", href: "/dashboard/biodata" },
     { icon: Search, label: "বায়োডাটা খুঁজুন", href: "/search" },
     { icon: Heart, label: "শর্টলিস্ট", href: "/dashboard/shortlist" },
-    { icon: Eye, label: "দেখা বায়োডাটা", href: "/dashboard/viewed" },
-    { icon: Crown, label: "সদস্যতা", href: "/dashboard/membership" },
-    { icon: Settings, label: "সেটিংস", href: "/dashboard/settings" },
   ]
 
   const getMembershipBadge = (type: string) => {
@@ -141,7 +137,7 @@ export function DashboardContent() {
           <Menu className="w-6 h-6" />
         </button>
         <Link href="/" className="text-xl font-bold text-primary">
-          নিকাহ
+          FreelancerMarriage
         </Link>
         <div className="w-10" />
       </header>
@@ -158,7 +154,7 @@ export function DashboardContent() {
       >
         <div className="flex items-center justify-between h-16 px-6 border-b border-border">
           <Link href="/" className="text-xl font-bold text-primary">
-            নিকাহ
+            FreelancerMarriage
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}
@@ -250,7 +246,7 @@ export function DashboardContent() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             {/* Connections Remaining */}
-            <div className="bg-gradient-to-br from-pink-500 to-rose-600 rounded-2xl p-5 text-white relative overflow-hidden">
+            <div className="bg-linear-to-br from-pink-500 to-rose-600 rounded-2xl p-5 text-white relative overflow-hidden">
               <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10" />
               <div className="relative">
                 <div className="flex items-center gap-2 mb-2">
@@ -265,7 +261,7 @@ export function DashboardContent() {
             </div>
 
             {/* Days Remaining */}
-            <div className="bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl p-5 text-white relative overflow-hidden">
+            <div className="bg-linear-to-br from-violet-500 to-purple-600 rounded-2xl p-5 text-white relative overflow-hidden">
               <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10" />
               <div className="relative">
                 <div className="flex items-center gap-2 mb-2">
@@ -278,7 +274,7 @@ export function DashboardContent() {
             </div>
 
             {/* Total Viewed */}
-            <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-5 text-white relative overflow-hidden">
+            <div className="bg-linear-to-br from-emerald-500 to-teal-600 rounded-2xl p-5 text-white relative overflow-hidden">
               <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10" />
               <div className="relative">
                 <div className="flex items-center gap-2 mb-2">
@@ -291,7 +287,7 @@ export function DashboardContent() {
             </div>
 
             {/* Membership Type */}
-            <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-5 text-white relative overflow-hidden">
+            <div className="bg-linear-to-br from-amber-500 to-orange-600 rounded-2xl p-5 text-white relative overflow-hidden">
               <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10" />
               <div className="relative">
                 <div className="flex items-center gap-2 mb-2">
@@ -362,12 +358,6 @@ export function DashboardContent() {
                   <p className="text-sm text-muted-foreground">আপনি যাদের বায়োডাটা দেখেছেন</p>
                 </div>
               </div>
-              <Link href="/dashboard/viewed">
-                <Button variant="outline" size="sm" className="gap-2 bg-transparent">
-                  সব দেখুন
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </Link>
             </div>
 
             {statsLoading ? (
@@ -377,14 +367,14 @@ export function DashboardContent() {
               </div>
             ) : stats?.viewedBiodatas && stats.viewedBiodatas.length > 0 ? (
               <div className="divide-y divide-border">
-                {stats.viewedBiodatas.slice(0, 5).map((biodata, index) => (
+                {stats.viewedBiodatas.map((biodata, index) => (
                   <Link
                     key={biodata.viewId}
                     href={`/biodata/${biodata.biodataNo}`}
                     className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors group"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    <div className="relative w-14 h-14 rounded-full overflow-hidden bg-gradient-to-br from-pink-100 to-rose-200 shrink-0">
+                    <div className="relative w-14 h-14 rounded-full overflow-hidden bg-linear-to-br from-pink-100 to-rose-200 shrink-0">
                       {biodata.photo ? (
                         <Image
                           src={biodata.photo || "/placeholder.svg"}

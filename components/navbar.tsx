@@ -89,7 +89,7 @@ export function Navbar() {
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setIsUserMenuOpen(false)} />
                   <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-pink-100 rounded-xl shadow-2xl shadow-pink-100/50 z-50 overflow-hidden animate-fade-in-down">
-                    <div className="p-3 border-b border-pink-50 bg-gradient-to-r from-pink-50 to-white">
+                    <div className="p-3 border-b border-pink-50 bg-linear-to-r from-pink-50 to-white">
                       <p className="font-medium text-foreground truncate">{user.name}</p>
                       <p className="text-sm text-muted-foreground truncate">{user.email}</p>
                     </div>
