@@ -129,7 +129,7 @@ export default async function BiodataDetailPage({
   )
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-100 via-pink-50/30 to-slate-100 pt-20">
+    <main className="min-h-screen bg-linear-to-br from-slate-100 via-pink-50/30 to-slate-100 pt-20">
       <style>{`
         @keyframes fadeInUp {
           from {
@@ -183,12 +183,12 @@ export default async function BiodataDetailPage({
           {/* Left Sidebar */}
           <div className="lg:w-80 shrink-0">
             <div
-              className="bg-gradient-to-b from-slate-800 to-slate-900 rounded-2xl p-6 sticky top-24 shadow-xl"
+              className="bg-linear-to-b from-slate-800 to-slate-900 rounded-2xl p-6 sticky top-24 shadow-xl"
               style={{ animation: "fadeInLeft 0.5s ease-out" }}
             >
               <div className="flex justify-center mb-5">
                 <div
-                  className="relative w-32 h-32 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 border-4 border-pink-500/50 overflow-hidden"
+                  className="relative w-32 h-32 rounded-full bg-linear-to-br from-slate-600 to-slate-700 border-4 border-pink-500/50 overflow-hidden"
                   style={{ animation: "pulse-glow 3s ease-in-out infinite" }}
                 >
                   {isUnlocked ? (
@@ -202,7 +202,7 @@ export default async function BiodataDetailPage({
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-500 to-slate-600">
+                      <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-slate-500 to-slate-600">
                         <User className="w-16 h-16 text-slate-300" />
                       </div>
                     )
@@ -218,7 +218,7 @@ export default async function BiodataDetailPage({
                           className="w-full h-full object-cover blur-xl scale-110"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-500 to-slate-600">
+                        <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-slate-500 to-slate-600">
                           <User className="w-16 h-16 text-slate-300 blur-sm" />
                         </div>
                       )}
@@ -246,7 +246,7 @@ export default async function BiodataDetailPage({
                 <p className="text-gray-400 text-sm mb-1">বায়োডাটা নং:</p>
                 <p className="text-white font-bold text-xl tracking-wider">{bio.biodataNo}</p>
                 {isVerified && (
-                  <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-yellow-500 to-amber-500 text-yellow-900 text-xs font-semibold px-3 py-1.5 rounded-full mt-3 shadow-lg">
+                  <div className="inline-flex items-center gap-1.5 bg-linear-to-r from-yellow-500 to-amber-500 text-yellow-900 text-xs font-semibold px-3 py-1.5 rounded-full mt-3 shadow-lg">
                     <BadgeCheck className="w-3.5 h-3.5" />
                     ভেরিফাইড
                   </div>
@@ -267,7 +267,7 @@ export default async function BiodataDetailPage({
                 <ShortlistButton biodataId={bio.id} isLoggedIn={!!userId} variant="large" />
                 <Button
                   variant="outline"
-                  className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white border-0 gap-2 font-semibold shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
+                  className="w-full bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white border-0 gap-2 font-semibold shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
                 >
                   <Share2 className="w-4 h-4" />
                   শেয়ার করুন
