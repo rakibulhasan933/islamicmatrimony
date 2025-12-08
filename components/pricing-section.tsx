@@ -90,7 +90,7 @@ export function PricingSection() {
     <section
       ref={sectionRef}
       id="pricing"
-      className="py-16 md:py-24 bg-gradient-to-b from-pink-50/50 to-white relative overflow-hidden"
+      className="py-16 md:py-24 bg-linear-to-b from-pink-50/50 to-white relative overflow-hidden"
     >
       {/* Background decorations */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-pink-100/30 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
@@ -115,9 +115,8 @@ export function PricingSection() {
           {packages.map((pkg, index) => (
             <div
               key={index}
-              className={`relative bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 flex flex-col ${
-                pkg.popular ? "border-2 border-pink-500 md:scale-105 z-10" : "border border-gray-100"
-              } ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+              className={`relative bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 flex flex-col ${pkg.popular ? "border-2 border-pink-500 md:scale-105 z-10" : "border border-gray-100"
+                } ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
               style={{ transitionDelay: `${index * 100}ms` }}
             >
               {/* Popular Badge */}
@@ -167,11 +166,10 @@ export function PricingSection() {
               {/* Button */}
               <Link href={pkg.type === "free" ? "/register" : "/pricing"}>
                 <Button
-                  className={`w-full py-3 rounded-xl font-bold transition-all ${
-                    pkg.buttonStyle === "primary"
+                  className={`w-full py-3 rounded-xl font-bold transition-all ${pkg.buttonStyle === "primary"
                       ? "bg-pink-600 hover:bg-pink-700 text-white shadow-lg shadow-pink-200"
                       : "border-2 border-gray-200 text-muted-foreground hover:border-pink-600 hover:text-pink-600 bg-transparent"
-                  }`}
+                    }`}
                 >
                   {pkg.buttonText}
                 </Button>

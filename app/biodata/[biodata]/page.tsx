@@ -118,7 +118,7 @@ export default async function BiodataDetailPage({
   const isUnlocked = isOwnBiodata || hasViewedBiodata
 
   console.log(
-    "[v0] Biodata page loaded - userId:",
+    "Biodata page loaded - userId:",
     userId,
     "isOwnBiodata:",
     isOwnBiodata,

@@ -12,7 +12,9 @@ const quickLinks = [
 
 export function Footer() {
   return (
-    <footer className="bg-gray-900 text-white pt-16 pb-8">
+    <footer
+      id="contact"
+      className="bg-gray-900 text-white pt-16 pb-8">
       <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
         {/* Brand */}
         <div>

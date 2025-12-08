@@ -527,7 +527,7 @@ function SearchContent() {
                         <div className={`relative bg-muted ${viewMode === "list" ? "w-32 shrink-0" : "aspect-4/3"}`}>
                           {biodata.photo ? (
                             <Image
-                              src={biodata.photo || "/placeholder.svg"}
+                              src={"/placeholder.svg"}
                               alt={`বায়োডাটা ${biodata.biodataNo}`}
                               fill
                               className="object-cover group-hover:scale-105 transition-transform duration-300"
