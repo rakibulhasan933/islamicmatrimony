@@ -50,7 +50,7 @@ function SectionCard({
         animation: `fadeInUp 0.5s ease-out ${delay}ms both`,
       }}
     >
-      <div className="bg-gradient-to-r from-pink-600 to-pink-500 px-5 py-3 flex items-center justify-between">
+      <div className="bg-linear-to-r from-pink-600 to-pink-500 px-5 py-3 flex items-center justify-between">
         <h3 className="font-bold text-white text-base tracking-wide">{title}</h3>
         {isLocked && (
           <div className="flex items-center gap-1.5 bg-white/20 px-2.5 py-1 rounded-full animate-pulse">
@@ -62,10 +62,10 @@ function SectionCard({
       <div className="p-1 relative">
         {children}
         {isLocked && (
-          <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-white/90 to-white backdrop-blur-sm flex items-center justify-center">
+          <div className="absolute inset-0 bg-linear-to-b from-white/60 via-white/90 to-white backdrop-blur-sm flex items-center justify-center">
             <div className="text-center p-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-pink-100 to-pink-200 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg animate-bounce">
-                <Lock className="w-7 h-7 text-pink-600" />
+              <div className="w-14 h-14 bg-linear-to-br from-pink-100 to-pink-200 rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg animate-bounce">
+                <Lock className="w-7 h-7 text-pink-500" />
               </div>
               <p className="text-gray-700 text-sm font-semibold">এই তথ্য দেখতে আনলক করুন</p>
               <p className="text-gray-500 text-xs mt-1">১টি কানেকশন খরচ হবে</p>
@@ -109,7 +109,7 @@ function InfoRow({
 
 function LockedPhotoPreview({ photo }: { photo: string | null }) {
   return (
-    <div className="relative w-full aspect-square max-w-[200px] mx-auto rounded-xl overflow-hidden bg-gradient-to-br from-slate-200 to-slate-300 shadow-lg">
+    <div className="relative w-full aspect-square max-w-[200px] mx-auto rounded-xl overflow-hidden bg-linear-to-br from-slate-200 to-slate-300 shadow-lg">
       {photo ? (
         <Image src={photo || "/placeholder.svg"} alt="Profile" fill className="object-cover blur-xl scale-110" />
       ) : (
@@ -117,7 +117,7 @@ function LockedPhotoPreview({ photo }: { photo: string | null }) {
           <User className="w-20 h-20 text-slate-400" />
         </div>
       )}
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-800/40 via-slate-800/70 to-slate-900/90 flex flex-col items-center justify-center">
+      <div className="absolute inset-0 bg-linear-to-b from-slate-800/40 via-slate-800/70 to-slate-900/90 flex flex-col items-center justify-center">
         <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center mb-3 border-2 border-white/20">
           <Lock className="w-8 h-8 text-white" />
         </div>
@@ -156,7 +156,7 @@ export function BiodataContent({
 
   console.log("[v0] Starting unlock process for biodata:", bio.id)
   console.log(
-    "[v0] Current state - isLoggedIn:",
+    "Current state - isLoggedIn:",
     isLoggedIn,
     "canViewBiodata:",
     canViewBiodata,
@@ -165,15 +165,6 @@ export function BiodataContent({
   )
 
   const handleUnlock = async () => {
-    console.log("[v0] Starting unlock process for biodata:", bio.id)
-    console.log(
-      "[v0] Current state - isLoggedIn:",
-      isLoggedIn,
-      "canViewBiodata:",
-      canViewBiodata,
-      "connections:",
-      connections,
-    )
 
     setIsUnlocking(true)
     setError("")
@@ -186,15 +177,15 @@ export function BiodataContent({
       })
 
       const data = await response.json()
-      console.log("[v0] API Response:", data)
+      console.log(" API Response:", data)
 
       if (!response.ok) {
-        console.log("[v0] Unlock failed:", data.error)
+        console.log(" Unlock failed:", data.error)
         setError(data.error || "বায়োডাটা আনলক করতে সমস্যা হয়েছে")
         return
       }
 
-      console.log("[v0] Unlock successful! Remaining connections:", data.remainingConnections)
+      console.log(" Unlock successful! Remaining connections:", data.remainingConnections)
       setIsUnlocked(true)
       if (data.remainingConnections !== undefined) {
         setConnections(data.remainingConnections)
@@ -206,7 +197,7 @@ export function BiodataContent({
       // Reload the page to update the sidebar with unlocked photo and name
       window.location.reload()
     } catch (err) {
-      console.log("[v0] Unlock error:", err)
+      console.log(" Unlock error:", err)
       setError("বায়োডাটা আনলক করতে সমস্যা হয়েছে")
     } finally {
       setIsUnlocking(false)
@@ -218,7 +209,7 @@ export function BiodataContent({
       <div className="flex-1 space-y-5">
         {/* Unlock Banner - Improved design */}
         <div
-          className="bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 rounded-2xl p-6 text-white shadow-2xl border border-slate-700 relative overflow-hidden"
+          className="bg-linear-to-r from-slate-800 via-slate-900 to-slate-800 rounded-2xl p-6 text-white shadow-2xl border border-slate-700 relative overflow-hidden"
           style={{ animation: "fadeInUp 0.5s ease-out" }}
         >
           {/* Background decoration */}
@@ -266,7 +257,7 @@ export function BiodataContent({
                   <Link href="/login" className="block">
                     <Button
                       size="lg"
-                      className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold px-8 shadow-lg border-0"
+                      className="w-full bg-linear-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold px-8 shadow-lg border-0"
                     >
                       <User className="w-5 h-5 mr-2" />
                       লগইন করুন
@@ -277,7 +268,7 @@ export function BiodataContent({
                     size="lg"
                     onClick={handleUnlock}
                     disabled={isUnlocking}
-                    className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold px-8 shadow-lg border-0 disabled:opacity-70"
+                    className="w-full bg-linear-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold px-8 shadow-lg border-0 disabled:opacity-70"
                   >
                     {isUnlocking ? (
                       <>
@@ -295,7 +286,7 @@ export function BiodataContent({
                   <Link href="/pricing" className="block">
                     <Button
                       size="lg"
-                      className="w-full bg-gradient-to-r from-yellow-400 to-amber-500 text-yellow-900 hover:from-yellow-500 hover:to-amber-600 font-bold px-8 shadow-lg border-0"
+                      className="w-full bg-linear-to-r from-yellow-400 to-amber-500 text-yellow-900 hover:from-yellow-500 hover:to-amber-600 font-bold px-8 shadow-lg border-0"
                     >
                       <Crown className="w-5 h-5 mr-2" />
                       {membershipType === "free" ? "প্যাকেজ কিনুন" : "কানেকশন শেষ - রিনিউ করুন"}
@@ -370,7 +361,7 @@ export function BiodataContent({
       {/* Unlocked Success Badge */}
       {!isOwnBiodata && (
         <div
-          className="bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 rounded-xl p-4 text-white shadow-lg flex items-center gap-4 relative overflow-hidden"
+          className="bg-linear-to-r from-green-500 via-emerald-500 to-teal-500 rounded-xl p-4 text-white shadow-lg flex items-center gap-4 relative overflow-hidden"
           style={{ animation: "fadeInUp 0.3s ease-out" }}
         >
           <div className="absolute inset-0 opacity-20">
