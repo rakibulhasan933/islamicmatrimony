@@ -197,7 +197,7 @@ export function HeroSection() {
             onClick={() => setShowAdvanced(!showAdvanced)}
             className="mt-4 text-pink-600 hover:text-pink-700 text-sm font-medium flex items-center gap-1 mx-auto transition"
           >
-            {showAdvanced ? "সাধারণ সার্চ" : "বিস্তা��িত সার্চ"}
+            {showAdvanced ? "সাধারণ সার্চ" : "বিস্তারিত সার্চ"}
             <ChevronDown className={`w-4 h-4 transition-transform ${showAdvanced ? "rotate-180" : ""}`} />
           </button>
 
