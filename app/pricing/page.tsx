@@ -2,8 +2,6 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Navbar } from "@/components/navbar"
-import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import { Crown, Check, Loader2, Star, User, BadgeCheck, X } from "lucide-react"
 import { useAuth } from "@/lib/hooks/use-auth"
@@ -109,8 +107,7 @@ export default function PricingPage() {
 
   return (
     <>
-      <Navbar />
-      <main className="min-h-screen bg-gradient-to-b from-pink-50 to-white pt-20">
+      <main className="min-h-screen bg-linear-to-b from-pink-50 to-white pt-20">
         <div className="container mx-auto px-4 py-16">
           {/* Header */}
           <div className="text-center mb-12">
@@ -135,9 +132,8 @@ export default function PricingPage() {
               return (
                 <div
                   key={pkg.id}
-                  className={`relative bg-white rounded-2xl p-6 border-2 transition-all hover:shadow-xl hover:-translate-y-1 ${
-                    pkg.popular ? "border-pink-500 shadow-lg shadow-pink-100 md:scale-105 z-10" : "border-gray-100"
-                  }`}
+                  className={`relative bg-white rounded-2xl p-6 border-2 transition-all hover:shadow-xl hover:-translate-y-1 ${pkg.popular ? "border-pink-500 shadow-lg shadow-pink-100 md:scale-105 z-10" : "border-gray-100"
+                    }`}
                 >
                   {pkg.popular && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
@@ -189,13 +185,12 @@ export default function PricingPage() {
                   <Button
                     onClick={() => handlePurchase(pkg.id)}
                     disabled={purchasing === pkg.id}
-                    className={`w-full ${
-                      pkg.popular
+                    className={`w-full ${pkg.popular
                         ? "bg-pink-600 hover:bg-pink-700 text-white shadow-lg shadow-pink-200"
                         : pkg.id === "gold"
                           ? "bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white"
                           : "border-2 border-gray-200 text-gray-700 hover:border-pink-600 hover:text-pink-600 bg-transparent"
-                    }`}
+                      }`}
                   >
                     {purchasing === pkg.id ? (
                       <>
@@ -217,7 +212,6 @@ export default function PricingPage() {
           </p>
         </div>
       </main>
-      <Footer />
     </>
   )
 }

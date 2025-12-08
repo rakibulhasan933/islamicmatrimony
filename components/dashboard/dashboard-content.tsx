@@ -5,20 +5,27 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { User, FileText, Heart, Settings, LogOut, Menu, X, Home, Search, Bell, ChevronRight } from "lucide-react"
+import {
+  User,
+  FileText,
+  Heart,
+  Settings,
+  LogOut,
+  Menu,
+  X,
+  Home,
+  Search,
+  ChevronRight,
+  Eye,
+  Clock,
+  Crown,
+  Calendar,
+  Zap,
+  ExternalLink,
+} from "lucide-react"
 import useSWR from "swr"
 
-interface DashboardContentProps {
-  user: {
-    id: number
-    email: string
-    name: string
-    phone?: string | null
-    profileImage?: string | null // Added profileImage
-  }
-}
-
-interface User {
+interface DashboardUser {
   id: number
   email: string
   name: string
@@ -26,17 +33,46 @@ interface User {
   profileImage?: string | null
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
+interface ViewedBiodata {
+  viewId: number
+  viewedAt: string
+  biodataId: number
+  biodataNo: string
+  fullName: string
+  photo: string | null
+  age: number | null
+  type: "bride" | "groom"
+  occupation: string | null
+  permanentDistrict: string | null
+  education: string | null
+}
 
+interface DashboardStats {
+  membership: {
+    type: string
+    status: string
+    connectionsRemaining: number
+    connectionsTotal: number
+    daysRemaining: number
+    expiresAt: string | null
+    startsAt: string | null
+  }
+  viewedBiodatas: ViewedBiodata[]
+  totalViews: number
+}
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
 export function DashboardContent() {
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
 
-  const { data } = useSWR<{ user: User }>("/api/auth/me", fetcher);
+  const { data: userData } = useSWR<{ user: DashboardUser }>("/api/auth/me", fetcher)
+  const { data: statsData, isLoading: statsLoading } = useSWR<DashboardStats>("/api/stats", fetcher)
 
-  const user: User | null = data?.user || null
+  const user = userData?.user || null
+  const stats = statsData
 
   const handleLogout = async () => {
     setIsLoggingOut(true)
@@ -56,9 +92,46 @@ export function DashboardContent() {
     { icon: FileText, label: "আমার বায়োডাটা", href: "/dashboard/biodata" },
     { icon: Search, label: "বায়োডাটা খুঁজুন", href: "/search" },
     { icon: Heart, label: "শর্টলিস্ট", href: "/dashboard/shortlist" },
-    { icon: Bell, label: "নোটিফিকেশন", href: "/dashboard/notifications" },
+    { icon: Eye, label: "দেখা বায়োডাটা", href: "/dashboard/viewed" },
+    { icon: Crown, label: "সদস্যতা", href: "/dashboard/membership" },
     { icon: Settings, label: "সেটিংস", href: "/dashboard/settings" },
   ]
+
+  const getMembershipBadge = (type: string) => {
+    switch (type) {
+      case "gold":
+        return { label: "গোল্ড", color: "bg-gradient-to-r from-yellow-400 to-amber-500 text-white" }
+      case "silver":
+        return { label: "সিলভার", color: "bg-gradient-to-r from-gray-300 to-gray-400 text-gray-800" }
+      default:
+        return { label: "ফ্রি", color: "bg-gray-100 text-gray-600" }
+    }
+  }
+
+  const membershipBadge = getMembershipBadge(stats?.membership?.type || "free")
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString("bn-BD", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
+  }
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / (1000 * 60))
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+
+    if (diffMins < 60) return `${diffMins} মিনিট আগে`
+    if (diffHours < 24) return `${diffHours} ঘন্টা আগে`
+    if (diffDays < 7) return `${diffDays} দিন আগে`
+    return formatDate(dateString)
+  }
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -95,7 +168,7 @@ export function DashboardContent() {
           </button>
         </div>
 
-        {/* User Info - Updated to show profile image */}
+        {/* User Info */}
         <div className="p-4 border-b border-border">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
@@ -113,7 +186,9 @@ export function DashboardContent() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-foreground truncate">{user?.name}</p>
-              <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
+              <span className={`inline-block text-xs px-2 py-0.5 rounded-full ${membershipBadge.color}`}>
+                {membershipBadge.label}
+              </span>
             </div>
           </div>
         </div>
@@ -152,13 +227,13 @@ export function DashboardContent() {
       {/* Main Content */}
       <main className="lg:ml-72 pt-16 lg:pt-0 min-h-screen">
         <div className="p-4 md:p-6 lg:p-8">
-          {/* Welcome Section - Added profile image */}
+          {/* Welcome Section */}
           <div className="mb-8 flex items-center gap-4">
             <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden shrink-0">
               {user?.profileImage ? (
                 <Image
                   src={user?.profileImage || "/placeholder.svg"}
-                  alt={user?.name}
+                  alt={user?.name || ""}
                   width={80}
                   height={80}
                   className="w-full h-full object-cover"
@@ -170,6 +245,64 @@ export function DashboardContent() {
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-foreground">স্বাগতম, {user?.name}!</h1>
               <p className="text-muted-foreground mt-1">আপনার ড্যাশবোর্ডে আপনাকে স্বাগতম</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            {/* Connections Remaining */}
+            <div className="bg-gradient-to-br from-pink-500 to-rose-600 rounded-2xl p-5 text-white relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10" />
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-2">
+                  <Zap className="w-5 h-5" />
+                  <span className="text-sm text-white/80">কানেকশন বাকি</span>
+                </div>
+                <p className="text-4xl font-bold">
+                  {statsLoading ? "..." : stats?.membership?.connectionsRemaining || 0}
+                </p>
+                <p className="text-xs text-white/70 mt-1">মোট {stats?.membership?.connectionsTotal || 0} টির মধ্যে</p>
+              </div>
+            </div>
+
+            {/* Days Remaining */}
+            <div className="bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl p-5 text-white relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10" />
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-2">
+                  <Calendar className="w-5 h-5" />
+                  <span className="text-sm text-white/80">মেয়াদ বাকি</span>
+                </div>
+                <p className="text-4xl font-bold">{statsLoading ? "..." : stats?.membership?.daysRemaining || 0}</p>
+                <p className="text-xs text-white/70 mt-1">দিন</p>
+              </div>
+            </div>
+
+            {/* Total Viewed */}
+            <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-5 text-white relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10" />
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-2">
+                  <Eye className="w-5 h-5" />
+                  <span className="text-sm text-white/80">দেখা বায়োডাটা</span>
+                </div>
+                <p className="text-4xl font-bold">{statsLoading ? "..." : stats?.totalViews || 0}</p>
+                <p className="text-xs text-white/70 mt-1">টি বায়োডাটা</p>
+              </div>
+            </div>
+
+            {/* Membership Type */}
+            <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-5 text-white relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10" />
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-2">
+                  <Crown className="w-5 h-5" />
+                  <span className="text-sm text-white/80">প্যাকেজ</span>
+                </div>
+                <p className="text-2xl font-bold capitalize">{statsLoading ? "..." : membershipBadge.label}</p>
+                {stats?.membership?.expiresAt && (
+                  <p className="text-xs text-white/70 mt-1">{formatDate(stats.membership.expiresAt)} পর্যন্ত</p>
+                )}
+              </div>
             </div>
           </div>
 
@@ -218,24 +351,92 @@ export function DashboardContent() {
             </Link>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-card border border-border rounded-xl p-4 md:p-6">
-              <p className="text-sm text-muted-foreground">মোট বায়োডাটা</p>
-              <p className="text-2xl md:text-3xl font-bold text-foreground mt-1">১২,৪৫৬</p>
+          <div className="bg-card border border-border rounded-2xl overflow-hidden">
+            <div className="flex items-center justify-between p-5 border-b border-border">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Clock className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h2 className="font-bold text-foreground">সম্প্রতি দেখা বায়োডাটা</h2>
+                  <p className="text-sm text-muted-foreground">আপনি যাদের বায়োডাটা দেখেছেন</p>
+                </div>
+              </div>
+              <Link href="/dashboard/viewed">
+                <Button variant="outline" size="sm" className="gap-2 bg-transparent">
+                  সব দেখুন
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </Link>
             </div>
-            <div className="bg-card border border-border rounded-xl p-4 md:p-6">
-              <p className="text-sm text-muted-foreground">পাত্রীর বায়োডাটা</p>
-              <p className="text-2xl md:text-3xl font-bold text-foreground mt-1">৬,৭৮৯</p>
-            </div>
-            <div className="bg-card border border-border rounded-xl p-4 md:p-6">
-              <p className="text-sm text-muted-foreground">পাত্রের বায়োডাটা</p>
-              <p className="text-2xl md:text-3xl font-bold text-foreground mt-1">৫,৬৬৭</p>
-            </div>
-            <div className="bg-card border border-border rounded-xl p-4 md:p-6">
-              <p className="text-sm text-muted-foreground">সফল বিয়ে</p>
-              <p className="text-2xl md:text-3xl font-bold text-foreground mt-1">১,২৩৪</p>
-            </div>
+
+            {statsLoading ? (
+              <div className="p-8 text-center">
+                <div className="animate-spin w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full mx-auto" />
+                <p className="text-muted-foreground mt-3">লোড হচ্ছে...</p>
+              </div>
+            ) : stats?.viewedBiodatas && stats.viewedBiodatas.length > 0 ? (
+              <div className="divide-y divide-border">
+                {stats.viewedBiodatas.slice(0, 5).map((biodata, index) => (
+                  <Link
+                    key={biodata.viewId}
+                    href={`/biodata/${biodata.biodataNo}`}
+                    className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors group"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <div className="relative w-14 h-14 rounded-full overflow-hidden bg-gradient-to-br from-pink-100 to-rose-200 shrink-0">
+                      {biodata.photo ? (
+                        <Image
+                          src={biodata.photo || "/placeholder.svg"}
+                          alt={biodata.fullName}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <User className="w-6 h-6 text-pink-400" />
+                        </div>
+                      )}
+                      <div
+                        className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white ${biodata.type === "bride" ? "bg-pink-500" : "bg-blue-500"
+                          }`}
+                      />
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold text-foreground truncate">{biodata.fullName}</h3>
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full ${biodata.type === "bride" ? "bg-pink-100 text-pink-700" : "bg-blue-100 text-blue-700"
+                            }`}
+                        >
+                          {biodata.type === "bride" ? "পাত্রী" : "পাত্র"}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground truncate">
+                        {biodata.age && `${biodata.age} বছর`}
+                        {biodata.permanentDistrict && ` • ${biodata.permanentDistrict}`}
+                        {biodata.occupation && ` • ${biodata.occupation}`}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{formatTimeAgo(biodata.viewedAt)}</p>
+                    </div>
+
+                    <ExternalLink className="w-5 h-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="p-8 text-center">
+                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                  <Eye className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <h3 className="font-semibold text-foreground mb-1">কোনো বায়োডাটা দেখা হয়নি</h3>
+                <p className="text-sm text-muted-foreground mb-4">আপনি এখনো কোনো বায়োডাটা আনলক করেননি</p>
+                <Link href="/search">
+                  <Button className="bg-primary hover:bg-primary/90">বায়োডাটা খুঁজুন</Button>
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </main>

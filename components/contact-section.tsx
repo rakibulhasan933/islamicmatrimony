@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Phone, Lock, Crown, Eye, Loader2 } from "lucide-react"
+import { Lock, Crown, Eye, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
@@ -68,81 +68,85 @@ export function ContactSection({
   }
 
   return (
-    <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 bg-pink-50 rounded-lg">
-          <Phone className="w-5 h-5 text-pink-600" />
-        </div>
-        <h3 className="font-semibold text-lg text-gray-900">যোগাযোগ</h3>
+    <div className="bg-pink-50/80 rounded-xl overflow-hidden border border-pink-200 shadow-sm">
+      <div className="bg-gradient-to-r from-pink-600 to-pink-500 px-5 py-3">
+        <h3 className="font-bold text-white text-base tracking-wide">যোগাযোগ</h3>
       </div>
-
-      {!isLoggedIn ? (
-        // Not logged in
-        <div className="bg-gray-50 rounded-lg p-6 text-center">
-          <Lock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600 mb-4">যোগাযোগের তথ্য দেখতে অনুগ্রহ করে লগইন করুন</p>
-          <Link href="/login">
-            <Button className="bg-pink-600 hover:bg-pink-700 text-white">লগইন করুন</Button>
-          </Link>
-        </div>
-      ) : contactData ? (
-        // Contact is visible
-        <div className="bg-green-50 rounded-lg p-6">
-          <div className="flex items-center gap-2 text-green-700 mb-4">
-            <Eye className="w-5 h-5" />
-            <span className="font-medium">যোগাযোগের তথ্য</span>
-          </div>
-          <div className="space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-              <span className="text-gray-600 text-sm min-w-[140px]">অভিভাবকের সম্পর্ক:</span>
-              <span className="font-medium text-gray-900">{contactData.guardianRelation || "N/A"}</span>
+      <div className="p-4">
+        {!isLoggedIn ? (
+          <div className="bg-white rounded-xl p-8 text-center shadow-inner">
+            <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Lock className="w-8 h-8 text-pink-500" />
             </div>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-              <span className="text-gray-600 text-sm min-w-[140px]">অভিভাবকের ফোন:</span>
-              <span className="font-bold text-lg text-pink-600">{contactData.guardianPhone || "N/A"}</span>
+            <p className="text-gray-600 mb-5">যোগাযোগের তথ্য দেখতে অনুগ্রহ করে লগইন করুন</p>
+            <Link href="/login">
+              <Button className="bg-gradient-to-r from-pink-600 to-pink-500 hover:from-pink-700 hover:to-pink-600 text-white px-8 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
+                লগইন করুন
+              </Button>
+            </Link>
+          </div>
+        ) : contactData ? (
+          <div className="space-y-0">
+            <div className="flex border-b border-pink-100 hover:bg-pink-100/50 transition-colors duration-200">
+              <span className="text-gray-700 text-sm py-3 px-4 w-[45%] shrink-0 font-medium bg-pink-50/50">
+                অভিভাবকের সম্পর্ক
+              </span>
+              <span className="text-gray-900 text-sm py-3 px-4 flex-1">{contactData.guardianRelation || "—"}</span>
+            </div>
+            <div className="flex hover:bg-pink-100/50 transition-colors duration-200">
+              <span className="text-gray-700 text-sm py-3 px-4 w-[45%] shrink-0 font-medium bg-pink-50/50">
+                অভিভাবকের ফোন
+              </span>
+              <span className="text-pink-600 text-sm py-3 px-4 flex-1 font-bold">
+                {contactData.guardianPhone || "—"}
+              </span>
             </div>
           </div>
-        </div>
-      ) : canViewContact ? (
-        // Can view contact (has membership)
-        <div className="bg-pink-50 rounded-lg p-6 text-center">
-          <div className="flex items-center justify-center gap-2 text-pink-700 mb-4">
-            <Crown className="w-5 h-5" />
-            <span className="font-medium">{membershipType === "gold" ? "গোল্ড" : "সিলভার"} সদস্য</span>
-          </div>
-          <p className="text-gray-600 mb-2">
-            আপনার বাকি কন্টাক্ট ভিউ: <span className="font-bold text-pink-600">{views}</span>
-          </p>
-          {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
-          <Button onClick={handleViewContact} disabled={isViewing} className="bg-pink-600 hover:bg-pink-700 text-white">
-            {isViewing ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                লোড হচ্ছে...
-              </>
-            ) : (
-              <>
-                <Eye className="w-4 h-4 mr-2" />
-                যোগাযোগ নম্বর দেখুন
-              </>
-            )}
-          </Button>
-        </div>
-      ) : (
-        // No membership or no views remaining
-        <div className="bg-yellow-50 rounded-lg p-6 text-center">
-          <Crown className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
-          <p className="text-gray-700 font-medium mb-2">যোগাযোগের তথ্য দেখতে সদস্যতা প্রয়োজন</p>
-          <p className="text-gray-600 text-sm mb-4">সিলভার বা গোল্ড প্যাকেজ কিনে যোগাযোগের তথ্য দেখুন</p>
-          {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
-          <Link href="/pricing">
-            <Button className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white">
-              <Crown className="w-4 h-4 mr-2" />
-              প্যাকেজ দেখুন
+        ) : canViewContact ? (
+          <div className="bg-white rounded-xl p-8 text-center shadow-inner">
+            <div className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-pink-100 to-purple-100 text-pink-700 px-4 py-2 rounded-full mb-4">
+              <Crown className="w-5 h-5" />
+              <span className="font-semibold">{membershipType === "gold" ? "গোল্ড" : "সিলভার"} সদস্য</span>
+            </div>
+            <p className="text-gray-600 mb-2 text-sm">
+              আপনার বাকি কন্টাক্ট ভিউ: <span className="font-bold text-pink-600 text-lg">{views}</span>
+            </p>
+            {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
+            <Button
+              onClick={handleViewContact}
+              disabled={isViewing}
+              className="bg-gradient-to-r from-pink-600 to-pink-500 hover:from-pink-700 hover:to-pink-600 text-white px-8 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
+            >
+              {isViewing ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  লোড হচ্ছে...
+                </>
+              ) : (
+                <>
+                  <Eye className="w-4 h-4 mr-2" />
+                  যোগাযোগ নম্বর দেখুন
+                </>
+              )}
             </Button>
-          </Link>
-        </div>
-      )}
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl p-8 text-center shadow-inner">
+            <div className="w-16 h-16 bg-gradient-to-br from-yellow-100 to-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Crown className="w-8 h-8 text-yellow-500" />
+            </div>
+            <p className="text-gray-700 font-semibold mb-2">যোগাযোগের তথ্য দেখতে সদস্যতা প্রয়োজন</p>
+            <p className="text-gray-500 text-sm mb-5">সিলভার বা গোল্ড প্যাকেজ কিনে যোগাযোগের তথ্য দেখুন</p>
+            {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
+            <Link href="/pricing">
+              <Button className="bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white px-8 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
+                <Crown className="w-4 h-4 mr-2" />
+                প্যাকেজ দেখুন
+              </Button>
+            </Link>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
