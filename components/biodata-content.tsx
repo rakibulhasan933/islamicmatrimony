@@ -154,15 +154,15 @@ export function BiodataContent({
   const [connections, setConnections] = useState(remainingConnections)
   const [error, setError] = useState("");
 
-  console.log("[v0] Starting unlock process for biodata:", bio.id)
-  console.log(
-    "Current state - isLoggedIn:",
-    isLoggedIn,
-    "canViewBiodata:",
-    canViewBiodata,
-    "connections:",
-    connections,
-  )
+  // console.log(" Starting unlock process for biodata:", bio.id)
+  // console.log(
+  //   "Current state - isLoggedIn:",
+  //   isLoggedIn,
+  //   "canViewBiodata:",
+  //   canViewBiodata,
+  //   "connections:",
+  //   connections,
+  // )
 
   const handleUnlock = async () => {
 
@@ -177,15 +177,15 @@ export function BiodataContent({
       })
 
       const data = await response.json()
-      console.log(" API Response:", data)
+      // console.log(" API Response:", data)
 
       if (!response.ok) {
-        console.log(" Unlock failed:", data.error)
+        // console.log(" Unlock failed:", data.error)
         setError(data.error || "বায়োডাটা আনলক করতে সমস্যা হয়েছে")
         return
       }
 
-      console.log(" Unlock successful! Remaining connections:", data.remainingConnections)
+      // console.log(" Unlock successful! Remaining connections:", data.remainingConnections)
       setIsUnlocked(true)
       if (data.remainingConnections !== undefined) {
         setConnections(data.remainingConnections)
@@ -197,7 +197,7 @@ export function BiodataContent({
       // Reload the page to update the sidebar with unlocked photo and name
       window.location.reload()
     } catch (err) {
-      console.log(" Unlock error:", err)
+      // console.log(" Unlock error:", err)
       setError("বায়োডাটা আনলক করতে সমস্যা হয়েছে")
     } finally {
       setIsUnlocking(false)

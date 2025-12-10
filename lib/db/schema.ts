@@ -7,15 +7,13 @@ export const biodataTypeEnum = pgEnum("biodata_type", ["bride", "groom"])
 export const membershipTypeEnum = pgEnum("membership_type", ["free", "silver", "gold"])
 export const membershipStatusEnum = pgEnum("membership_status", ["active", "expired", "cancelled"])
 
-// Users table for authentication
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
+  clerkId: varchar("clerk_id", { length: 255 }).notNull().unique(), // Clerk user ID
   email: varchar("email", { length: 255 }).notNull().unique(),
-  password: varchar("password", { length: 255 }).notNull(),
   name: varchar("name", { length: 255 }).notNull(),
   phone: varchar("phone", { length: 20 }),
   profileImage: text("profile_image"),
-  emailVerified: boolean("email_verified").default(true),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 })
@@ -23,8 +21,8 @@ export const users = pgTable("users", {
 // Memberships table
 export const memberships = pgTable("memberships", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id")
-    .references(() => users.id, { onDelete: "cascade" })
+  userId: varchar("user_id", { length: 255 })
+    .references(() => users.clerkId, { onDelete: "cascade" })
     .notNull(),
   type: membershipTypeEnum("type").notNull().default("free"),
   status: membershipStatusEnum("status").notNull().default("active"),
@@ -40,8 +38,8 @@ export const memberships = pgTable("memberships", {
 export const biodatas = pgTable("biodatas", {
   id: serial("id").primaryKey(),
   biodataNo: varchar("biodata_no", { length: 20 }).notNull().unique(),
-  userId: integer("user_id")
-    .references(() => users.id, { onDelete: "cascade" })
+  userId: varchar("user_id", { length: 255 })
+    .references(() => users.clerkId, { onDelete: "cascade" })
     .notNull(),
   type: biodataTypeEnum("type").notNull(),
   photo: text("photo"),
@@ -110,8 +108,8 @@ export const biodatas = pgTable("biodatas", {
 // Contact views table
 export const contactViews = pgTable("contact_views", {
   id: serial("id").primaryKey(),
-  viewerUserId: integer("viewer_user_id")
-    .references(() => users.id, { onDelete: "cascade" })
+  viewerUserId: varchar("viewer_user_id", { length: 255 })
+    .references(() => users.clerkId, { onDelete: "cascade" })
     .notNull(),
   biodataId: integer("biodata_id")
     .references(() => biodatas.id, { onDelete: "cascade" })
@@ -122,8 +120,8 @@ export const contactViews = pgTable("contact_views", {
 // Shortlist table
 export const shortlists = pgTable("shortlists", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id")
-    .references(() => users.id, { onDelete: "cascade" })
+  userId: varchar("user_id", { length: 255 })
+    .references(() => users.clerkId, { onDelete: "cascade" })
     .notNull(),
   biodataId: integer("biodata_id")
     .references(() => biodatas.id, { onDelete: "cascade" })

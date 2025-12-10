@@ -1,25 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { cookies } from "next/headers"
 import { db } from "@/lib/db"
 import { biodatas } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
-import { jwtVerify } from "jose"
-
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "your-secret-key-min-32-chars-long!")
-
-async function getUser() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("session_token")?.value;
-
-  if (!token) {
-    return null
-  }
-
-  const { payload } = await jwtVerify(token, JWT_SECRET)
-  const { userId } = payload as { userId: number; }
-
-  return userId
-}
+import { getCurrentUser } from "@/lib/clerk-auth"
 
 function generateBiodataNo(): string {
   const prefix = "NB"
@@ -29,16 +12,16 @@ function generateBiodataNo(): string {
 
 export async function POST(request: NextRequest) {
   try {
-    const userId = await getUser()
+    const user = await getCurrentUser()
 
-    if (!userId) {
+    if (!user) {
       return NextResponse.json({ error: "অনুগ্রহ করে লগইন করুন" }, { status: 401 })
     }
 
     const data = await request.json()
 
     // Check if user already has a biodata
-    const existingBiodata = await db.select().from(biodatas).where(eq(biodatas.userId, userId)).limit(1)
+    const existingBiodata = await db.select().from(biodatas).where(eq(biodatas.userId, user.clerkId)).limit(1)
 
     const biodataData = {
       type: data.type as "bride" | "groom",
@@ -97,7 +80,7 @@ export async function POST(request: NextRequest) {
       await db.insert(biodatas).values({
         ...biodataData,
         biodataNo,
-        userId,
+        userId: user.clerkId,
         isApproved: true,
         isPublished: true,
         createdAt: new Date(),

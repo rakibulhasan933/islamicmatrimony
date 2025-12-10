@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Hind_Siliguri } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
+import { ClerkProvider } from "@clerk/nextjs"
 import "./globals.css"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
@@ -41,17 +42,19 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="bn" className="scroll-smooth hydrated">
-      <body
-        className={`${hindSiliguri.className} font-sans antialiased bg-pink-50 text-gray-800 min-h-screen flex flex-col`}
-      >
-        <Navbar />
-        <div className="flex-1">
-          {children}
-          <Analytics />
-        </div>
-        <Footer />
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="bn" className="scroll-smooth hydrated">
+        <body
+          className={`${hindSiliguri.className} font-sans antialiased bg-pink-50 text-gray-800 min-h-screen flex flex-col`}
+        >
+          <Navbar />
+          <div className="flex-1">
+            {children}
+            <Analytics />
+          </div>
+          <Footer />
+        </body>
+      </html>
+    </ClerkProvider>
   )
 }

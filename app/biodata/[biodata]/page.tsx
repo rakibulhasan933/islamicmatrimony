@@ -7,29 +7,14 @@ import { db } from "@/lib/db"
 import { biodatas, contactViews, memberships } from "@/lib/db/schema"
 import { eq, and } from "drizzle-orm"
 import { notFound } from "next/navigation"
-import { cookies } from "next/headers"
-import { jwtVerify } from "jose"
 import { ShortlistButton } from "@/components/shortlist-button"
 import { CopyLinkButton } from "@/components/copy-link-button"
 import { BiodataContent } from "@/components/biodata-content"
+import { auth } from "@clerk/nextjs/server"
 
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "your-secret-key-min-32-chars-long!")
 
-async function getUserId() {
-  const cookieStore = await cookies()
-  const token = cookieStore.get("session_token")?.value
 
-  if (!token) return null
-
-  try {
-    const { payload } = await jwtVerify(token, JWT_SECRET)
-    return (payload as { userId: number }).userId
-  } catch {
-    return null
-  }
-}
-
-async function checkGoldMembership(userId: number) {
+async function checkGoldMembership(userId: string) {
   const membership = await db
     .select()
     .from(memberships)
@@ -78,7 +63,7 @@ export default async function BiodataDetailPage({
   }
 
   const bio = biodataList[0]
-  const userId = await getUserId()
+  const { userId } = await auth()
 
   const isVerified = await checkGoldMembership(bio.userId)
 
@@ -110,23 +95,23 @@ export default async function BiodataDetailPage({
     if (membership.length > 0) {
       membershipType = membership[0].type
       remainingConnections = membership[0].contactViewsRemaining || 0
-      canViewBiodata = membershipType !== "free" && remainingConnections > 0
+      canViewBiodata = remainingConnections > 0
     }
   }
 
   // Determine if content should be unlocked
   const isUnlocked = isOwnBiodata || hasViewedBiodata
 
-  console.log(
-    "Biodata page loaded - userId:",
-    userId,
-    "isOwnBiodata:",
-    isOwnBiodata,
-    "hasViewedBiodata:",
-    hasViewedBiodata,
-    "isUnlocked:",
-    isUnlocked,
-  )
+  // console.log(
+  //   "Biodata page loaded - userId:",
+  //   userId,
+  //   "isOwnBiodata:",
+  //   isOwnBiodata,
+  //   "hasViewedBiodata:",
+  //   hasViewedBiodata,
+  //   "isUnlocked:",
+  //   isUnlocked,
+  // )
 
   return (
     <main className="min-h-screen bg-linear-to-br from-slate-100 via-pink-50/30 to-slate-100 pt-20">
