@@ -1,32 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { cookies } from "next/headers"
 import { db } from "@/lib/db"
 import { shortlists, biodatas } from "@/lib/db/schema"
 import { eq, and } from "drizzle-orm"
-import { jwtVerify } from "jose"
-
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "your-secret-key-min-32-chars-long!")
-
-async function getUserId() {
-  const cookieStore = await cookies()
-  const token = cookieStore.get("session_token")?.value
-
-  if (!token) return null
-
-  try {
-    const { payload } = await jwtVerify(token, JWT_SECRET)
-    return (payload as { userId: number }).userId
-  } catch {
-    return null
-  }
-}
+import { getCurrentUser } from "@/lib/clerk-auth"
 
 // GET - Get user's shortlist
 export async function GET() {
   try {
-    const userId = await getUserId()
+    const user = await getCurrentUser()
 
-    if (!userId) {
+    if (!user) {
       return NextResponse.json({ error: "অনুগ্রহ করে লগইন করুন" }, { status: 401 })
     }
 
@@ -51,7 +34,7 @@ export async function GET() {
       })
       .from(shortlists)
       .innerJoin(biodatas, eq(shortlists.biodataId, biodatas.id))
-      .where(eq(shortlists.userId, userId))
+      .where(eq(shortlists.userId, user.clerkId))
       .orderBy(shortlists.createdAt)
 
     return NextResponse.json({ shortlist: shortlistItems })
@@ -64,9 +47,9 @@ export async function GET() {
 // POST - Add to shortlist
 export async function POST(request: NextRequest) {
   try {
-    const userId = await getUserId()
+    const user = await getCurrentUser()
 
-    if (!userId) {
+    if (!user) {
       return NextResponse.json({ error: "অনুগ্রহ করে লগইন করুন" }, { status: 401 })
     }
 
@@ -80,7 +63,7 @@ export async function POST(request: NextRequest) {
     const existing = await db
       .select()
       .from(shortlists)
-      .where(and(eq(shortlists.userId, userId), eq(shortlists.biodataId, biodataId)))
+      .where(and(eq(shortlists.userId, user.clerkId), eq(shortlists.biodataId, biodataId)))
       .limit(1)
 
     if (existing.length > 0) {
@@ -88,7 +71,7 @@ export async function POST(request: NextRequest) {
     }
 
     await db.insert(shortlists).values({
-      userId,
+      userId: user.clerkId,
       biodataId,
     })
 
@@ -102,9 +85,9 @@ export async function POST(request: NextRequest) {
 // DELETE - Remove from shortlist
 export async function DELETE(request: NextRequest) {
   try {
-    const userId = await getUserId()
+    const user = await getCurrentUser()
 
-    if (!userId) {
+    if (!user) {
       return NextResponse.json({ error: "অনুগ্রহ করে লগইন করুন" }, { status: 401 })
     }
 
@@ -116,7 +99,7 @@ export async function DELETE(request: NextRequest) {
 
     await db
       .delete(shortlists)
-      .where(and(eq(shortlists.userId, userId), eq(shortlists.biodataId, Number.parseInt(biodataId))))
+      .where(and(eq(shortlists.userId, user.clerkId), eq(shortlists.biodataId, Number.parseInt(biodataId))))
 
     return NextResponse.json({ success: true, message: "শর্টলিস্ট থেকে সরানো হয়েছে" })
   } catch (error) {

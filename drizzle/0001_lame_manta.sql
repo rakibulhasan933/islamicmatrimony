@@ -1,0 +1,4 @@
+ALTER TABLE "users" ADD COLUMN "clerk_id" varchar(255) NOT NULL;--> statement-breakpoint
+ALTER TABLE "users" DROP COLUMN "password";--> statement-breakpoint
+ALTER TABLE "users" DROP COLUMN "email_verified";--> statement-breakpoint
+ALTER TABLE "users" ADD CONSTRAINT "users_clerk_id_unique" UNIQUE("clerk_id");

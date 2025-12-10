@@ -1,39 +1,22 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { cookies } from "next/headers"
 import { db } from "@/lib/db"
 import { memberships } from "@/lib/db/schema"
 import { eq, and } from "drizzle-orm"
-import { jwtVerify } from "jose"
-
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "your-secret-key-min-32-chars-long!")
-
-async function getUserId() {
-  const cookieStore = await cookies()
-  const token = cookieStore.get("session_token")?.value
-
-  if (!token) return null
-
-  try {
-    const { payload } = await jwtVerify(token, JWT_SECRET)
-    return (payload as { userId: number }).userId
-  } catch {
-    return null
-  }
-}
+import { getCurrentUser } from "@/lib/clerk-auth"
 
 // GET - Get user's membership
 export async function GET() {
   try {
-    const userId = await getUserId()
+    const user = await getCurrentUser()
 
-    if (!userId) {
+    if (!user) {
       return NextResponse.json({ error: "অনুগ্রহ করে লগইন করুন" }, { status: 401 })
     }
 
     const membership = await db
       .select()
       .from(memberships)
-      .where(and(eq(memberships.userId, userId), eq(memberships.status, "active")))
+      .where(and(eq(memberships.userId, user.clerkId), eq(memberships.status, "active")))
       .limit(1)
 
     if (membership.length === 0) {
@@ -57,9 +40,9 @@ export async function GET() {
 // POST - Purchase/upgrade membership
 export async function POST(request: NextRequest) {
   try {
-    const userId = await getUserId()
+    const user = await getCurrentUser()
 
-    if (!userId) {
+    if (!user) {
       return NextResponse.json({ error: "অনুগ্রহ করে লগইন করুন" }, { status: 401 })
     }
 
@@ -69,17 +52,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "অবৈধ সদস্যতার ধরন" }, { status: 400 })
     }
 
-    // Updated membership details
     const membershipDetails = {
       silver: {
-        contactViewsTotal: 10, // Changed from 15 to 10
+        contactViewsTotal: 10,
         durationDays: 30,
-        price: 200, // Changed from 500 to 200
+        price: 200,
       },
       gold: {
-        contactViewsTotal: 30, // Changed from 50 to 30
+        contactViewsTotal: 30,
         durationDays: 90,
-        price: 500, // Changed from 1200 to 500
+        price: 500,
       },
     }
 
@@ -91,17 +73,19 @@ export async function POST(request: NextRequest) {
     const existingMembership = await db
       .select()
       .from(memberships)
-      .where(and(eq(memberships.userId, userId), eq(memberships.status, "active")))
+      .where(and(eq(memberships.userId, user.clerkId), eq(memberships.status, "active")))
       .limit(1)
 
     if (existingMembership.length > 0) {
+
+      const viewsRemaining = existingMembership[0].contactViewsRemaining ?? 0
       // Update existing membership
       await db
         .update(memberships)
         .set({
           type: type as "silver" | "gold",
-          contactViewsRemaining: existingMembership[0].contactViewsRemaining + details.contactViewsTotal,
-          contactViewsTotal: existingMembership[0].contactViewsTotal + details.contactViewsTotal,
+          contactViewsRemaining: viewsRemaining + details.contactViewsTotal,
+          contactViewsTotal: viewsRemaining + details.contactViewsTotal,
           expiresAt,
           updatedAt: new Date(),
         })
@@ -109,7 +93,7 @@ export async function POST(request: NextRequest) {
     } else {
       // Create new membership
       await db.insert(memberships).values({
-        userId,
+        userId: user.clerkId,
         type: type as "silver" | "gold",
         status: "active",
         contactViewsRemaining: details.contactViewsTotal,

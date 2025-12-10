@@ -1,31 +1,27 @@
 import { redirect } from "next/navigation"
-import { cookies } from "next/headers"
 import { db } from "@/lib/db"
 import { users, memberships, contactViews } from "@/lib/db/schema"
 import { eq, and, count } from "drizzle-orm"
-import { jwtVerify } from "jose"
 import { Crown, Eye, Clock, CheckCircle, XCircle, BadgeCheck, Star, User } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { auth } from "@clerk/nextjs/server"
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "your-secret-key-min-32-chars-long!")
 
 async function getUser() {
-  const cookieStore = await cookies()
-  const token = cookieStore.get("session_token")?.value
-  if (!token) return null
+  const { userId } = await auth()
 
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET)
-    const { userId } = payload as { userId: number }
-    const user = await db.select().from(users).where(eq(users.id, userId)).limit(1)
+
+    const user = await db.select().from(users).where(eq(users.clerkId, userId || "")).limit(1)
     return user[0] || null
   } catch {
     return null
   }
 }
 
-async function getMembership(userId: number) {
+async function getMembership(userId: string) {
   const membership = await db
     .select()
     .from(memberships)
@@ -35,7 +31,7 @@ async function getMembership(userId: number) {
   return membership[0] || null
 }
 
-async function getContactViewsCount(userId: number) {
+async function getContactViewsCount(userId: string) {
   const result = await db.select({ count: count() }).from(contactViews).where(eq(contactViews.viewerUserId, userId))
 
   return result[0]?.count || 0
@@ -48,8 +44,8 @@ export default async function MembershipPage() {
     redirect("/login")
   }
 
-  const membership = await getMembership(user.id)
-  const viewsCount = await getContactViewsCount(user.id)
+  const membership = await getMembership(user.clerkId)
+  const viewsCount = await getContactViewsCount(user.clerkId)
 
   const getMembershipTypeDisplay = (type: string) => {
     const types: Record<string, { name: string; color: string; icon: typeof Crown }> = {

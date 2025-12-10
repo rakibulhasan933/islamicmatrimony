@@ -1,26 +1,19 @@
 import { redirect } from "next/navigation"
-import { cookies } from "next/headers"
 import { db } from "@/lib/db"
 import { users, biodatas } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 import { BiodataForm } from "@/components/dashboard/biodata-form"
-import { jwtVerify } from "jose"
+import { auth } from "@clerk/nextjs/server"
 
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "your-secret-key-min-32-chars-long!")
 
 async function getUser() {
-  const cookieStore = await cookies()
-  const token = cookieStore.get("session_token")?.value
-  if (!token) return null
+  const { userId } = await auth()
 
-  const { payload } = await jwtVerify(token, JWT_SECRET)
-  const { userId } = payload as { userId: number }
-
-  const user = await db.select().from(users).where(eq(users.id, userId)).limit(1)
+  const user = await db.select().from(users).where(eq(users.clerkId, userId || "")).limit(1)
   return user[0] || null
 }
 
-async function getUserBiodata(userId: number) {
+async function getUserBiodata(userId: string) {
   const biodata = await db.select().from(biodatas).where(eq(biodatas.userId, userId)).limit(1)
 
   return biodata[0] || null
@@ -33,7 +26,7 @@ export default async function BiodataPage() {
     redirect("/login")
   }
 
-  const existingBiodata = await getUserBiodata(user.id)
+  const existingBiodata = await getUserBiodata(user.clerkId)
 
   return <BiodataForm user={user} existingBiodata={existingBiodata} />
 }

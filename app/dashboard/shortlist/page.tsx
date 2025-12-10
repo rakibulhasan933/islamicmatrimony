@@ -9,25 +9,22 @@ import Image from "next/image"
 import { Heart, User, MapPin, GraduationCap, Briefcase } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { RemoveFromShortlistButton } from "@/components/remove-shortlist-button"
+import { auth } from "@clerk/nextjs/server"
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "your-secret-key-min-32-chars-long!")
 
 async function getUser() {
-  const cookieStore = await cookies()
-  const token = cookieStore.get("session_token")?.value
-  if (!token) return null
 
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET)
-    const { userId } = payload as { userId: number }
-    const user = await db.select().from(users).where(eq(users.id, userId)).limit(1)
+    const { userId } = await auth()
+    const user = await db.select().from(users).where(eq(users.clerkId, userId || "")).limit(1)
     return user[0] || null
   } catch {
     return null
   }
 }
 
-async function getShortlist(userId: number) {
+async function getShortlist(userId: string) {
   const items = await db
     .select({
       id: shortlists.id,
@@ -71,7 +68,7 @@ export default async function ShortlistPage() {
     redirect("/login")
   }
 
-  const shortlistItems = await getShortlist(user.id)
+  const shortlistItems = await getShortlist(user.clerkId)
 
   return (
     <div className="p-6">
@@ -115,9 +112,8 @@ export default async function ShortlistPage() {
                 )}
                 <div className="absolute top-3 left-3">
                   <span
-                    className={`text-xs font-medium px-2 py-1 rounded-full ${
-                      item.biodata.type === "bride" ? "bg-pink-100 text-pink-700" : "bg-blue-100 text-blue-700"
-                    }`}
+                    className={`text-xs font-medium px-2 py-1 rounded-full ${item.biodata.type === "bride" ? "bg-pink-100 text-pink-700" : "bg-blue-100 text-blue-700"
+                      }`}
                   >
                     {item.biodata.type === "bride" ? "পাত্রী" : "পাত্র"}
                   </span>

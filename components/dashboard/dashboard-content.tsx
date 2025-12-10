@@ -23,14 +23,7 @@ import {
   ExternalLink,
 } from "lucide-react"
 import useSWR from "swr"
-
-interface DashboardUser {
-  id: number
-  email: string
-  name: string
-  phone?: string | null
-  profileImage?: string | null
-}
+import { useUser, useClerk } from "@clerk/nextjs"
 
 interface ViewedBiodata {
   viewId: number
@@ -67,16 +60,23 @@ export function DashboardContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
 
-  const { data: userData } = useSWR<{ user: DashboardUser }>("/api/auth/me", fetcher)
+  const { user: clerkUser, isLoaded } = useUser()
+  const { signOut } = useClerk()
+
   const { data: statsData, isLoading: statsLoading } = useSWR<DashboardStats>("/api/stats", fetcher)
 
-  const user = userData?.user || null
+  const userName = clerkUser?.firstName
+    ? `${clerkUser.firstName} ${clerkUser.lastName || ""}`.trim()
+    : clerkUser?.emailAddresses[0]?.emailAddress?.split("@")[0] || "User"
+  const userEmail = clerkUser?.emailAddresses[0]?.emailAddress || ""
+  const userImage = clerkUser?.imageUrl || null
+
   const stats = statsData
 
   const handleLogout = async () => {
     setIsLoggingOut(true)
     try {
-      await fetch("/api/auth/logout", { method: "POST" })
+      await signOut()
       router.push("/")
       router.refresh()
     } catch (error) {
@@ -129,6 +129,14 @@ export function DashboardContent() {
     return formatDate(dateString)
   }
 
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full" />
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-muted/30">
       {/* Mobile Header */}
@@ -149,8 +157,9 @@ export function DashboardContent() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-full w-72 bg-card border-r border-border z-50 transform transition-transform duration-300 lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+        className={`fixed top-0 left-0 h-full w-72 bg-card border-r border-border z-50 transform transition-transform duration-300 lg:translate-x-0 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
         <div className="flex items-center justify-between h-16 px-6 border-b border-border">
           <Link href="/" className="text-xl font-bold text-primary">
@@ -164,14 +173,14 @@ export function DashboardContent() {
           </button>
         </div>
 
-        {/* User Info */}
+        {/* User Info - Updated to use Clerk user data */}
         <div className="p-4 border-b border-border">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
-              {user?.profileImage ? (
+              {userImage ? (
                 <Image
-                  src={user.profileImage || "/placeholder.svg"}
-                  alt={user.name}
+                  src={userImage || "/placeholder.svg"}
+                  alt={userName}
                   width={48}
                   height={48}
                   className="w-full h-full object-cover"
@@ -181,7 +190,7 @@ export function DashboardContent() {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-foreground truncate">{user?.name}</p>
+              <p className="font-semibold text-foreground truncate">{userName}</p>
               <span className={`inline-block text-xs px-2 py-0.5 rounded-full ${membershipBadge.color}`}>
                 {membershipBadge.label}
               </span>
@@ -195,10 +204,11 @@ export function DashboardContent() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${item.active
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+                item.active
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
             >
               <item.icon className="w-5 h-5" />
               <span className="font-medium">{item.label}</span>
@@ -223,13 +233,13 @@ export function DashboardContent() {
       {/* Main Content */}
       <main className="lg:ml-72 pt-16 lg:pt-0 min-h-screen">
         <div className="p-4 md:p-6 lg:p-8">
-          {/* Welcome Section */}
+          {/* Welcome Section - Updated to use Clerk user data */}
           <div className="mb-8 flex items-center gap-4">
             <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden shrink-0">
-              {user?.profileImage ? (
+              {userImage ? (
                 <Image
-                  src={user?.profileImage || "/placeholder.svg"}
-                  alt={user?.name || ""}
+                  src={userImage || "/placeholder.svg"}
+                  alt={userName}
                   width={80}
                   height={80}
                   className="w-full h-full object-cover"
@@ -239,11 +249,12 @@ export function DashboardContent() {
               )}
             </div>
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-foreground">স্বাগতম, {user?.name}!</h1>
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">স্বাগতম, {userName}!</h1>
               <p className="text-muted-foreground mt-1">আপনার ড্যাশবোর্ডে আপনাকে স্বাগতম</p>
             </div>
           </div>
 
+          {/* ... existing code for stats cards ... */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             {/* Connections Remaining */}
             <div className="bg-linear-to-br from-pink-500 to-rose-600 rounded-2xl p-5 text-white relative overflow-hidden">
@@ -388,8 +399,9 @@ export function DashboardContent() {
                         </div>
                       )}
                       <div
-                        className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white ${biodata.type === "bride" ? "bg-pink-500" : "bg-blue-500"
-                          }`}
+                        className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white ${
+                          biodata.type === "bride" ? "bg-pink-500" : "bg-blue-500"
+                        }`}
                       />
                     </div>
 
@@ -397,8 +409,9 @@ export function DashboardContent() {
                       <div className="flex items-center gap-2">
                         <h3 className="font-semibold text-foreground truncate">{biodata.fullName}</h3>
                         <span
-                          className={`text-xs px-2 py-0.5 rounded-full ${biodata.type === "bride" ? "bg-pink-100 text-pink-700" : "bg-blue-100 text-blue-700"
-                            }`}
+                          className={`text-xs px-2 py-0.5 rounded-full ${
+                            biodata.type === "bride" ? "bg-pink-100 text-pink-700" : "bg-blue-100 text-blue-700"
+                          }`}
                         >
                           {biodata.type === "bride" ? "পাত্রী" : "পাত্র"}
                         </span>

@@ -1,32 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { cookies } from "next/headers"
 import { db } from "@/lib/db"
 import { memberships, contactViews, biodatas } from "@/lib/db/schema"
 import { eq, and } from "drizzle-orm"
-import { jwtVerify } from "jose"
-
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "your-secret-key-min-32-chars-long!")
-
-async function getUserId() {
-  const cookieStore = await cookies()
-  const token = cookieStore.get("session_token")?.value
-
-  if (!token) return null
-
-  try {
-    const { payload } = await jwtVerify(token, JWT_SECRET)
-    return (payload as { userId: number }).userId
-  } catch {
-    return null
-  }
-}
+import { getCurrentUser } from "@/lib/clerk-auth"
 
 // POST - View biodata (deduct 1 connection)
 export async function POST(request: NextRequest) {
   try {
-    const userId = await getUserId()
+    const user = await getCurrentUser()
 
-    if (!userId) {
+    if (!user) {
       return NextResponse.json({ error: "অনুগ্রহ করে লগইন করুন" }, { status: 401 })
     }
 
@@ -44,7 +27,7 @@ export async function POST(request: NextRequest) {
     }
 
     // If user is viewing their own biodata, allow free access
-    if (biodata[0].userId === userId) {
+    if (biodata[0].userId === user.clerkId) {
       return NextResponse.json({
         success: true,
         isOwnBiodata: true,
@@ -56,7 +39,7 @@ export async function POST(request: NextRequest) {
     const existingView = await db
       .select()
       .from(contactViews)
-      .where(and(eq(contactViews.viewerUserId, userId), eq(contactViews.biodataId, biodataId)))
+      .where(and(eq(contactViews.viewerUserId, user.clerkId), eq(contactViews.biodataId, biodataId)))
       .limit(1)
 
     if (existingView.length > 0) {
@@ -72,10 +55,10 @@ export async function POST(request: NextRequest) {
     const membership = await db
       .select()
       .from(memberships)
-      .where(and(eq(memberships.userId, userId), eq(memberships.status, "active")))
+      .where(and(eq(memberships.userId, user.clerkId), eq(memberships.status, "active")))
       .limit(1)
 
-    if (membership.length === 0 || membership[0].type === "free") {
+    if (membership.length === 0) {
       return NextResponse.json(
         {
           error: "বায়োডাটা দেখতে সদস্যতা প্রয়োজন। অনুগ্রহ করে প্যাকেজ কিনুন।",
@@ -85,18 +68,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (membership[0].contactViewsRemaining <= 0) {
-      return NextResponse.json(
-        {
-          error: "আপনার কোনো কানেকশন বাকি নেই। অনুগ্রহ করে নতুন প্যাকেজ কিনুন।",
-          needsMembership: true,
-        },
-        { status: 403 },
-      )
-    }
-
-    // Check if membership expired
-    if (membership[0].expiresAt && new Date(membership[0].expiresAt) < new Date()) {
+    if (membership[0].type !== "free" && membership[0].expiresAt && new Date(membership[0].expiresAt) < new Date()) {
       await db.update(memberships).set({ status: "expired" }).where(eq(memberships.id, membership[0].id))
 
       return NextResponse.json(
@@ -108,9 +80,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const viewsRemaining = membership[0].contactViewsRemaining ?? 0
+
+    if (viewsRemaining <= 0) {
+      return NextResponse.json(
+        {
+          error: "আপনার কাছে বায়োডাটা দেখার জন্য পর্যাপ্ত সংযোগ নেই। অনুগ্রহ করে নতুন প্যাকেজ কিনুন।",
+          needsMembership: true,
+        },
+        { status: 403 },
+      )
+    }
+
     // Record the view
     await db.insert(contactViews).values({
-      viewerUserId: userId,
+      viewerUserId: user.clerkId,
       biodataId,
     })
 
@@ -118,7 +102,7 @@ export async function POST(request: NextRequest) {
     await db
       .update(memberships)
       .set({
-        contactViewsRemaining: membership[0].contactViewsRemaining - 1,
+        contactViewsRemaining: viewsRemaining - 1,
         updatedAt: new Date(),
       })
       .where(eq(memberships.id, membership[0].id))
@@ -126,7 +110,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       unlocked: true,
-      remainingConnections: membership[0].contactViewsRemaining - 1,
+      remainingConnections: viewsRemaining - 1,
     })
   } catch (error) {
     console.error("Error viewing biodata:", error)
@@ -137,14 +121,14 @@ export async function POST(request: NextRequest) {
 // GET - Check if user can view biodata
 export async function GET(request: NextRequest) {
   try {
-    const userId = await getUserId()
+    const user = await getCurrentUser()
     const biodataId = request.nextUrl.searchParams.get("biodataId")
 
     if (!biodataId) {
       return NextResponse.json({ error: "বায়োডাটা আইডি আবশ্যক" }, { status: 400 })
     }
 
-    if (!userId) {
+    if (!user) {
       return NextResponse.json({
         canView: false,
         reason: "not_logged_in",
@@ -164,7 +148,7 @@ export async function GET(request: NextRequest) {
     }
 
     // If user is viewing their own biodata
-    if (biodata[0].userId === userId) {
+    if (biodata[0].userId === user.clerkId) {
       return NextResponse.json({
         canView: true,
         isOwnBiodata: true,
@@ -177,7 +161,7 @@ export async function GET(request: NextRequest) {
     const existingView = await db
       .select()
       .from(contactViews)
-      .where(and(eq(contactViews.viewerUserId, userId), eq(contactViews.biodataId, Number.parseInt(biodataId))))
+      .where(and(eq(contactViews.viewerUserId, user.clerkId), eq(contactViews.biodataId, Number.parseInt(biodataId))))
       .limit(1)
 
     if (existingView.length > 0) {
@@ -192,19 +176,30 @@ export async function GET(request: NextRequest) {
     const membership = await db
       .select()
       .from(memberships)
-      .where(and(eq(memberships.userId, userId), eq(memberships.status, "active")))
+      .where(and(eq(memberships.userId, user.clerkId), eq(memberships.status, "active")))
       .limit(1)
 
-    if (membership.length === 0 || membership[0].type === "free") {
+    if (membership.length === 0) {
       return NextResponse.json({
         canView: false,
-        reason: "free_user",
+        reason: "no_membership",
         unlocked: false,
         remainingConnections: 0,
       })
     }
 
-    if (membership[0].contactViewsRemaining <= 0) {
+    if (membership[0].type !== "free" && membership[0].expiresAt && new Date(membership[0].expiresAt) < new Date()) {
+      return NextResponse.json({
+        canView: false,
+        reason: "membership_expired",
+        unlocked: false,
+        remainingConnections: 0,
+      })
+    }
+
+    const viewsRemaining = membership[0].contactViewsRemaining ?? 0
+
+    if (viewsRemaining <= 0) {
       return NextResponse.json({
         canView: false,
         reason: "no_connections_remaining",
@@ -216,7 +211,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       canView: true,
       unlocked: false,
-      remainingConnections: membership[0].contactViewsRemaining,
+      remainingConnections: viewsRemaining,
       membershipType: membership[0].type,
     })
   } catch (error) {

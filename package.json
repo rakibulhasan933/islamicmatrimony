@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-rds-data": "latest",
+    "@clerk/nextjs": "latest",
     "@cloudflare/workers-types": "latest",
     "@electric-sql/pglite": "latest",
     "@hookform/resolvers": "^3.10.0",

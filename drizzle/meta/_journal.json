@@ -8,6 +8,27 @@
       "when": 1764945863606,
       "tag": "0000_funny_magma",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1765387864254,
+      "tag": "0001_lame_manta",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1765389762085,
+      "tag": "0002_calm_rage",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1765390847602,
+      "tag": "0003_lively_red_hulk",
+      "breakpoints": true
     }
   ]
 }
